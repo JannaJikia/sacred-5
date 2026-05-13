@@ -23,21 +23,31 @@ To regenerate images, see [`docs/screenshots/README.md`](docs/screenshots/README
 
 ## Staging branch
 
-This repo uses a long-lived **`staging`** branch for pre-production checks and Preview deployments.
+**Integration flow: `staging` first, then `staging` → `main`.**
 
-1. Keep **`staging` up to date with `main`** before large merges to avoid conflicts:
+- **`staging`** is where new work lands first (feature branches should merge here, or commit directly if that is your team norm). Point **Vercel Preview** (and your staging database) at this branch.
+- **`main`** is the production line. Update it only by merging **`staging` → `main`** (pull request or merge after Preview / QA).
 
-   ```bash
-   git fetch origin
-   git checkout staging
-   git merge origin/main
-   # resolve conflicts if any, then:
-   git push origin staging
-   ```
+Suggested commands when your latest commits are on local `main` but you want them on **`staging`** before touching `main`:
 
-2. **Ship changes**: merge `staging` → `main` (via PR or fast-forward) once Preview looks good.
+```bash
+git fetch origin
+git checkout staging
+git merge origin/main        # optional: start from latest remote main if needed
+git merge main               # bring your local main commits onto staging
+git push origin staging
+git checkout main
+```
 
-3. In **Vercel**, attach the same project to `staging` and set **Preview** environment variables (especially `DATABASE_URL` for a staging database) so migrations and smoke tests match production shape.
+Release to production when ready:
+
+```bash
+git checkout main
+git merge staging            # or open a PR: base main ← compare staging
+git push origin main
+```
+
+If a **hotfix** ships straight to `main`, merge **`main` → `staging`** once afterward so `staging` does not fall behind production.
 
 GitHub Actions CI runs on **pull requests** and on pushes to **`main`** and **`staging`** (see `.github/workflows/ci.yml`).
 
@@ -358,7 +368,7 @@ Set these in **Vercel → Project → Settings → Environment Variables**:
 
 ### Staging / Preview
 
-Use the **`staging`** Git workflow at the top of this README so Preview stays aligned with `main`. In Vercel, set **Preview** `DATABASE_URL` (and other vars) to a **staging Postgres** instance; keep **Production** pointed at production only.
+Use the **`staging`** workflow above: Preview should track **`staging`**, not `main`. In Vercel, set **Preview** `DATABASE_URL` (and other vars) to a **staging Postgres** instance; keep **Production** (from `main`) pointed at production only.
 
 No code changes are required beyond env configuration and running migrations on deploy (`pnpm db:deploy && pnpm build` or your `vercel-build` script).
 
