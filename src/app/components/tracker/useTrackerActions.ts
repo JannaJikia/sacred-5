@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { postDone, postUndo } from "@/lib/http/api";
+import { postDone, postUndo, type DoneResponse } from "@/lib/http/api";
 import { UI_TEXT } from "@/config/uiText";
 
 function emitPracticeUpdated() {
   window.dispatchEvent(new Event("practice-updated"));
+}
+
+function emitCoinsUpdated(coins: number) {
+  window.dispatchEvent(new CustomEvent("coins-updated", { detail: { coins } }));
 }
 
 export function useTrackerActions(reload: () => Promise<void>) {
@@ -14,13 +18,19 @@ export function useTrackerActions(reload: () => Promise<void>) {
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  async function onDone(practiceId: string) {
+  async function onDone(practiceId: string): Promise<DoneResponse | null> {
     try {
       setBusyKey(practiceId);
       setActionError(null);
-      await postDone(practiceId);
-      await reload();
+      const data = await postDone(practiceId);
+      try {
+        await reload();
+      } catch {
+        /* Balance from postDone is still valid; list may be stale until next refresh. */
+      }
+      emitCoinsUpdated(data.reward.coinsBalance);
       emitPracticeUpdated();
+      return data;
     } catch (e: unknown) {
       const err = e as import("@/lib/http/client").HttpError;
 
@@ -32,6 +42,7 @@ export function useTrackerActions(reload: () => Promise<void>) {
       } else {
         setActionError(err?.message ?? UI_TEXT.errors.doneFailed);
       }
+      return null;
     } finally {
       setBusyKey(null);
     }

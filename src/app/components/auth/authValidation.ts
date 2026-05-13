@@ -1,4 +1,5 @@
 import { UI_TEXT } from "@/config/uiText";
+import { parseRegisterPassword, passwordConfirmMessage } from "@/lib/auth/passwordPolicy";
 
 export type AuthMode = "login" | "register";
 
@@ -6,15 +7,38 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
-export function validateAuthInput(params: { username: string; password: string }): string | null {
+export function validateLoginInput(params: { username: string; password: string }): string | null {
   const u = params.username.trim();
   if (!u) return UI_TEXT.auth.usernameRequired;
   if (!params.password) return UI_TEXT.auth.passwordRequired;
   return null;
 }
 
-export function authErrorMessage(mode: AuthMode, data: unknown): string {
+export type RegisterFieldErrors = Partial<{
+  username: string;
+  password: string;
+  passwordConfirm: string;
+}>;
 
+export function validateRegisterInput(params: {
+  username: string;
+  password: string;
+  passwordConfirm: string;
+}): RegisterFieldErrors | null {
+  const errors: RegisterFieldErrors = {};
+  const u = params.username.trim();
+  if (!u) errors.username = UI_TEXT.auth.usernameRequired;
+
+  const pw = parseRegisterPassword(params.password);
+  if (!pw.ok) errors.password = pw.message;
+
+  const confirm = passwordConfirmMessage(params.password, params.passwordConfirm);
+  if (confirm) errors.passwordConfirm = confirm;
+
+  return Object.keys(errors).length ? errors : null;
+}
+
+export function authErrorMessage(mode: AuthMode, data: unknown): string {
   if (isRecord(data) && isRecord(data.error)) {
     const err = data.error as Record<string, unknown>;
     const code = typeof err.code === "string" ? err.code : undefined;
@@ -32,7 +56,6 @@ export function authErrorMessage(mode: AuthMode, data: unknown): string {
     }
   }
 
-  // Legacy shape: { error?: string, details?: unknown }
   if (isRecord(data)) {
     const legacyError = data.error;
     if (typeof legacyError === "string") return legacyError;
@@ -40,4 +63,3 @@ export function authErrorMessage(mode: AuthMode, data: unknown): string {
 
   return `${mode} failed`;
 }
-

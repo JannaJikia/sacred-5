@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProviders } from "@/app/components/theme/ThemeProviders";
 
 export const metadata: Metadata = {
   title: "Sacred 5",
@@ -16,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className="antialiased min-h-screen bg-[var(--background)] text-[var(--foreground)]"
         style={
@@ -28,8 +29,10 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
-        {children}
-        <Toaster richColors closeButton />
+        <ThemeProviders>
+          {children}
+          <Toaster richColors closeButton />
+        </ThemeProviders>
       </body>
     </html>
   );

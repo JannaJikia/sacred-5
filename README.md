@@ -1,24 +1,68 @@
-# Isha Practice Tracker
+# Sacred 5
 
-A full-stack practice / habit tracker built with **Next.js (App Router)**, **Prisma**, and **Postgres**, designed to showcase **backend correctness**:
+A full-stack **daily practice tracker** (walk, cold shower, journal, meditation, and custom habits) built with **Next.js (App Router)**, **Prisma**, and **Postgres**. The app emphasizes **backend correctness** and a polished product UI (themes, coins, weekly stats, onboarding).
+
+Repository: [github.com/JannaJikia/sacred-5](https://github.com/JannaJikia/sacred-5)
+
+## Screenshots
+
+| Marketing (`/welcome`) | Sign in (`/login`) |
+| --- | --- |
+| ![Marketing landing](docs/screenshots/marketing.png) | ![Login](docs/screenshots/login.png) |
+
+| Register (`/register`) | Stats (`/stats`, auth required — shows sign-in when logged out) |
+| --- | --- |
+| ![Register](docs/screenshots/register.png) | ![Stats](docs/screenshots/stats.png) |
+
+To regenerate images, see [`docs/screenshots/README.md`](docs/screenshots/README.md).
+
+## Live demo
+
+- **Production**: deploy this repo to Vercel (or your host) and set the env vars under [Deploy (Vercel)](#deploy-vercel).
+- **Legacy demo** (older deployment name): [isha-practice-tracker on Vercel](https://isha-practice-tracker.vercel.app/login) — may or may not match this branch; prefer your own Preview URL after connecting the repo.
+
+## Staging branch
+
+**Integration flow: `staging` first, then `staging` → `main`.**
+
+- **`staging`** is where new work lands first (feature branches should merge here, or commit directly if that is your team norm). Point **Vercel Preview** (and your staging database) at this branch.
+- **`main`** is the production line. Update it only by merging **`staging` → `main`** (pull request or merge after Preview / QA).
+
+Suggested commands when your latest commits are on local `main` but you want them on **`staging`** before touching `main`:
+
+```bash
+git fetch origin
+git checkout staging
+git merge origin/main        # optional: start from latest remote main if needed
+git merge main               # bring your local main commits onto staging
+git push origin staging
+git checkout main
+```
+
+Release to production when ready:
+
+```bash
+git checkout main
+git merge staging            # or open a PR: base main ← compare staging
+git push origin main
+```
+
+If a **hotfix** ships straight to `main`, merge **`main` → `staging`** once afterward so `staging` does not fall behind production.
+
+GitHub Actions CI runs on **pull requests** and on pushes to **`main`** and **`staging`** (see `.github/workflows/ci.yml`).
+
+---
+
+## What this project demonstrates
 
 - **Session auth** (httpOnly cookies, token hashing)
 - **Atomic business rules** (max-per-day, undo) enforced via DB transactions
 - **Timezone-safe day keys** and aggregation for stats
 - **Predictable API errors** (standardized error payloads; Zod `treeifyError`)
 - **Quality gates** (integration tests + CI + Git hooks)
-
-## Live Demo (Vercel)
-
-- **Login**: [isha-practice-tracker (Vercel)](https://isha-practice-tracker.vercel.app/login)
-
----
-
-## What this project demonstrates
-
-- **Clean boundaries**: Next.js Route Handlers are thin; domain logic lives in `src/server/**`.
-- **Concurrency safety**: the “done/undo” logic uses conditional `updateMany` + transactions to remain correct under concurrent requests.
-- **Operational realism**: migrations in CI, real Postgres integration tests, and deploy-ready env var strategy.
+- **Clean boundaries**: Next.js Route Handlers are thin; domain logic lives in `src/server/**`
+- **Concurrency safety**: the “done/undo” logic uses conditional `updateMany` + transactions to remain correct under concurrent requests
+- **Operational realism**: migrations in CI, real Postgres integration tests, and deploy-ready env var strategy
 
 ---
 
@@ -74,7 +118,7 @@ A full-stack practice / habit tracker built with **Next.js (App Router)**, **Pri
 - **dotenv-cli**: load `.env.test` for `pnpm test`
 - **ESLint** + **Next.js ESLint config**
 - **Husky**: pre-commit / pre-push hooks
-- **GitHub Actions**: CI on PRs + `main`
+- **GitHub Actions**: CI on PRs + pushes to `main` and `staging`
 
 ---
 
@@ -83,6 +127,10 @@ A full-stack practice / habit tracker built with **Next.js (App Router)**, **Pri
 - **User**
   - `username` unique
   - `passwordHash`
+  - `coins` (integer; optional gamification balance)
+- **DailyRewardClaim**
+  - Composite primary key `(userId, dayKey, rewardKey)` — idempotent “claimed this reward for this local day” (e.g. daily completion goal)
+  - Cascades when the user is deleted
 - **Practice**
   - Built-in and user-created practices live in the database
   - `points`, `maxPerDay` drive scoring + button disabling
@@ -100,6 +148,14 @@ A full-stack practice / habit tracker built with **Next.js (App Router)**, **Pri
 
 ---
 
+## Security notes
+
+- **Password policy** is enforced both in `POST /api/register` (Zod) and in `src/server/auth/register.ts` (`parseRegisterPassword`) so domain code cannot accidentally persist a weak password if a new caller bypasses the route.
+- **Login** still accepts passwords from `min(8)` in the route schema so existing accounts (e.g. seeded demos) are not locked out; new accounts must meet the stronger register policy (12+ chars, upper, digit, symbol).
+- **Rate limiting** is not implemented in-app. For production, add edge/WAF rules, Vercel firewall, or a shared store (e.g. Redis / Upstash) for `POST /api/login` and `POST /api/register` to throttle brute force and credential stuffing.
+
+---
+
 ## Business Rules (core logic)
 
 ### “Done” (increment)
@@ -108,6 +164,7 @@ Domain entrypoint: `src/server/tracker/done.ts`
 Atomic core: `src/server/tracker/applyCompletion.ts`
 
 - Enforces \(count + delta \le maxPerDay\)
+- After a successful increment, aggregates **total completions for that user and `dayKey`** across all practices; when the total first reaches the configured daily goal, records a **`DailyRewardClaim`** and increments **`User.coins`** once (idempotent for that day and reward key).
 - Concurrency-safe approach:
   - Conditional increment via `updateMany(where count <= maxPerDay - delta)`
   - If missing row, `createMany({ skipDuplicates: true })` to avoid transaction abort due to unique violations (Postgres aborts a transaction on *any* statement error)
@@ -128,7 +185,7 @@ Atomic core: `src/server/completions/undoCompletion.ts`
 
 ### Auth
 
-- `POST /api/register` → create user + set session cookie
+- `POST /api/register` → `{ username, password, passwordConfirm }` (policy + match validated in Zod and again in `register()`); create user + set session cookie
 - `POST /api/login` → validate credentials + set session cookie
 - `POST /api/logout` → delete session + clear cookie
 - `GET /api/me` → current user (401 if not logged in)
@@ -287,7 +344,7 @@ If you need to bypass hooks temporarily (not recommended), you can use `git comm
 
 Workflow: `.github/workflows/ci.yml`
 
-- Runs on PRs and pushes to `main`
+- Runs on PRs and pushes to `main` and `staging`
 - Steps:
   - `pnpm install --frozen-lockfile`
   - `pnpm check`
@@ -311,7 +368,9 @@ Set these in **Vercel → Project → Settings → Environment Variables**:
 
 ### Staging / Preview
 
-No code changes are needed for staging. Set `DATABASE_URL` to your staging database connection string in your deployment platform’s environment variables.
+Use the **`staging`** workflow above: Preview should track **`staging`**, not `main`. In Vercel, set **Preview** `DATABASE_URL` (and other vars) to a **staging Postgres** instance; keep **Production** (from `main`) pointed at production only.
+
+No code changes are required beyond env configuration and running migrations on deploy (`pnpm db:deploy && pnpm build` or your `vercel-build` script).
 
 ### Migrations on deploy
 

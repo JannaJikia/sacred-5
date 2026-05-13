@@ -7,7 +7,8 @@ import {
   fetchActiveDays,
   fetchDailyPracticeSums,
 } from "./repo";
-import { buildPerPractice, buildDailySeries } from "./build";
+import { buildPerPractice, buildDailySeries, buildDailyStackedTimeline } from "./build";
+import type { DailyStackedDay } from "./build";
 
 export async function getStats(
   db: Db,
@@ -40,6 +41,11 @@ export async function getStats(
   const dailyRows = await fetchDailyPracticeSums(db, userId, whereCharts);
   const dailySeries = buildDailySeries(practices, dailyRows);
 
+  let dailyStacked: DailyStackedDay[] | undefined;
+  if (range !== "all" && bounds.startDayKey && bounds.endDayKey) {
+    dailyStacked = buildDailyStackedTimeline(practices, dailyRows, bounds.startDayKey, bounds.endDayKey);
+  }
+
   return {
     range,
     asOfDayKey,
@@ -48,6 +54,7 @@ export async function getStats(
     totals: { totalCount, totalPoints, activeDays },
     perPractice,
     dailySeries,
+    dailyStacked,
     chartWindow,
   };
 }

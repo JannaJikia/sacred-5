@@ -86,10 +86,19 @@ export async function getCurrentUser() {
       tokenHash: hashToken(token),
       expiresAt: { gt: now },
     },
-    include: { user: true },
+    select: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          createdAt: true,
+          coins: true,
+        },
+      },
+    },
   });
 
-  if (!session) return null;
+  if (!session?.user) return null;
   return session.user;
 }
 

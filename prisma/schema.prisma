@@ -16,19 +16,34 @@ model User {
   id           String   @id @default(cuid())
   username     String   @unique
   passwordHash String
+  coins        Int      @default(0)
   createdAt    DateTime @default(now())
 
-  sessions      Session[]
-  completions   DailyPracticeCompletion[]
-  userPractices UserPractice[]
+  sessions       Session[]
+  completions    DailyPracticeCompletion[]
+  userPractices  UserPractice[]
+  rewardClaims   DailyRewardClaim[]
 
   practicesOwned Practice[] @relation("UserOwnedPractices")
+}
+
+model DailyRewardClaim {
+  userId    String
+  dayKey    String
+  rewardKey String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, dayKey, rewardKey])
+  @@index([userId])
 }
 
 model Practice {
   id          String  @id
   name        String
   description String?
+  iconKey     String?
   isCustom    Boolean @default(false)
   points      Int     @default(1)
   maxPerDay   Int     @default(1)

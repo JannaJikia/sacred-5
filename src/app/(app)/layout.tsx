@@ -13,5 +13,5 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   });
   if (!hasAny) redirect("/onboarding");
 
-  return <AppShell>{children}</AppShell>;
+  return <AppShell initialCoins={user.coins}>{children}</AppShell>;
 }

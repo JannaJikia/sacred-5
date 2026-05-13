@@ -1,0 +1,27 @@
+export const AUTH_STRINGS = {
+  signInTab: "Sign in",
+  createAccountTab: "Create account",
+  usernameLabel: "Username",
+  passwordLabel: "Password",
+  confirmPasswordLabel: "Confirm password",
+  usernamePlaceholder: "your_username",
+  passwordPlaceholder: "••••••••••••",
+  signingIn: "Signing in…",
+  creatingAccount: "Creating account…",
+  passwordHintTitle: "Password requirements",
+  requirementLength: "At least 12 characters",
+  requirementUpper: "One uppercase letter",
+  requirementNumber: "One number",
+  requirementSymbol: "One symbol (!@#$…)",
+  /** Server + client validation (full sentences for API / Zod). */
+  passwordErrors: {
+    minLength: "Password must be at least 12 characters.",
+    upper: "Password must include at least one uppercase letter.",
+    digit: "Password must include at least one number.",
+    symbol: "Password must include at least one symbol (for example ! @ # $).",
+  },
+  confirmPasswordRequired: "Confirm your password.",
+  passwordMismatch: "Passwords do not match.",
+  showPasswordAria: "Show password",
+  hidePasswordAria: "Hide password",
+} as const;

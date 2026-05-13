@@ -4,47 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchJson } from "@/lib/http/client";
 import { UI_TEXT } from "@/config/uiText";
-import { TrendingUp, Calendar, Activity, Droplets, BookOpen, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { TrendingUp, Calendar } from "lucide-react";
+import { STATS_STRINGS } from "@/config/strings/stats";
+import { StatsPracticeBreakdownRow } from "@components/stats/StatsPracticeBreakdownRow";
 
 type StatsResponse = {
   totals: { totalPoints: number; activeDays: number };
   perPractice: Array<{ practiceId: string; label: string; count: number; points: number }>;
-};
-
-function clamp01(n: number) {
-  if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.min(1, n));
-}
-
-const PRACTICE_STYLES: Record<
-  string,
-  { gradient: string; lightBg: string; lightText: string; icon: React.ElementType }
-> = {
-  walk: {
-    gradient: "from-emerald-400 to-teal-500",
-    lightBg: "bg-emerald-50",
-    lightText: "text-emerald-700",
-    icon: Activity,
-  },
-  cold_shower: {
-    gradient: "from-sky-400 to-cyan-500",
-    lightBg: "bg-sky-50",
-    lightText: "text-sky-700",
-    icon: Droplets,
-  },
-  journal: {
-    gradient: "from-amber-400 to-orange-500",
-    lightBg: "bg-amber-50",
-    lightText: "text-amber-700",
-    icon: BookOpen,
-  },
-  meditation: {
-    gradient: "from-violet-400 to-purple-500",
-    lightBg: "bg-violet-50",
-    lightText: "text-violet-700",
-    icon: Sparkles,
-  },
 };
 
 /* ─── Skeleton ────────────────────────────────────────────────────── */
@@ -135,76 +101,41 @@ export function StatsPanel() {
         <div className="rounded-2xl border bg-card p-4 shadow-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <TrendingUp className="h-4 w-4" />
-            <span className="text-xs font-medium uppercase tracking-wide">Week pts</span>
+            <span className="text-xs font-medium uppercase tracking-wide">{STATS_STRINGS.weekPointsLabel}</span>
           </div>
           <div className="mt-2 text-3xl font-bold text-primary">
             {data.totals.totalPoints}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">points earned this week</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{STATS_STRINGS.weekPointsHelp}</p>
         </div>
 
         <div className="rounded-2xl border bg-card p-4 shadow-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span className="text-xs font-medium uppercase tracking-wide">Active days</span>
+            <span className="text-xs font-medium uppercase tracking-wide">{STATS_STRINGS.activeDaysLabel}</span>
           </div>
           <div className="mt-2 text-3xl font-bold text-primary">
             {data.totals.activeDays}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">days with practice</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{STATS_STRINGS.activeDaysHelp}</p>
         </div>
       </div>
 
       {/* Per-practice breakdown */}
       {data.perPractice.length > 0 && (
         <div className="rounded-2xl border bg-card p-5 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold text-foreground">Practice breakdown</h3>
+          <h3 className="mb-4 text-sm font-semibold text-foreground">{STATS_STRINGS.breakdownTitle}</h3>
           <div className="space-y-4">
-            {data.perPractice.map((p) => {
-              const pct = clamp01(p.points / maxPoints);
-              const style = PRACTICE_STYLES[p.practiceId];
-              const Icon = style?.icon ?? Activity;
-
-              return (
-                <div key={p.practiceId}>
-                  <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn(
-                          "flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br",
-                          style?.gradient ?? "from-gray-400 to-gray-500"
-                        )}
-                      >
-                        <Icon className="h-3 w-3 text-white" />
-                      </div>
-                      <span className="text-sm font-medium text-foreground">{p.label}</span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">{p.count}×</span>
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-semibold",
-                          style?.lightBg ?? "bg-muted",
-                          style?.lightText ?? "text-foreground"
-                        )}
-                      >
-                        {p.points} pts
-                      </span>
-                    </div>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={cn(
-                        "h-full rounded-full bg-gradient-to-r transition-all duration-700",
-                        style?.gradient ?? "from-gray-400 to-gray-500"
-                      )}
-                      style={{ width: `${pct * 100}%` }}
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            {data.perPractice.map((p) => (
+              <StatsPracticeBreakdownRow
+                key={p.practiceId}
+                practiceId={p.practiceId}
+                label={p.label}
+                count={p.count}
+                points={p.points}
+                maxPoints={maxPoints}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -212,10 +143,8 @@ export function StatsPanel() {
       {data.perPractice.length === 0 && (
         <div className="rounded-2xl border bg-card p-8 text-center shadow-sm">
           <div className="text-3xl">🌱</div>
-          <p className="mt-2 text-sm font-medium text-foreground">No practices logged this week</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Mark a practice as done above to start building your streak.
-          </p>
+          <p className="mt-2 text-sm font-medium text-foreground">{STATS_STRINGS.emptyTitle}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{STATS_STRINGS.emptyBody}</p>
         </div>
       )}
     </section>

@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { PracticeRow } from "./PracticeRow";
 import { useTrackerData } from "./useTrackerData";
 import { useTrackerActions } from "./useTrackerActions";
+import { DailyGoalCelebration } from "./DailyGoalCelebration";
 import { AlertCircle, RefreshCw } from "lucide-react";
+import { TRACKER_STRINGS } from "@/config/strings/tracker";
+import { DAILY_COMPLETION_GOAL } from "@/config/rewards";
 
-/* ─── Skeleton loader ─────────────────────────────────────────────── */
 function PracticeRowSkeleton() {
   return (
     <li className="rounded-2xl border bg-card p-5 shadow-sm">
@@ -31,14 +34,16 @@ function PracticeRowSkeleton() {
   );
 }
 
-/* ─── Main component ──────────────────────────────────────────────── */
 export function PracticesList() {
   const { practices, completions, byPracticeId, error, loading, reload } = useTrackerData();
   const { busyKey, actionError, onDone, onUndo } = useTrackerActions(reload);
+  const [celebration, setCelebration] = useState<{
+    coinsEarned: number;
+    coinsBalance: number;
+  } | null>(null);
 
   const msg = actionError ?? error;
 
-  /* Error state */
   if (msg && !loading) {
     return (
       <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
@@ -52,10 +57,10 @@ export function PracticesList() {
                 onClick={() => void reload()}
               >
                 <RefreshCw className="h-3.5 w-3.5" />
-                Retry
+                {TRACKER_STRINGS.retry}
               </button>
               <a className="text-sm text-muted-foreground underline underline-offset-2" href="/login">
-                Go to login
+                {TRACKER_STRINGS.goToLogin}
               </a>
             </div>
           </div>
@@ -64,7 +69,6 @@ export function PracticesList() {
     );
   }
 
-  /* Loading state — skeletons */
   if (loading || !practices || !completions) {
     return (
       <section className="space-y-3">
@@ -81,25 +85,29 @@ export function PracticesList() {
     );
   }
 
-  /* Compute a total for today */
   const totalToday = Object.values(byPracticeId).reduce((sum, c) => sum + c.count, 0);
   const maxTotal = practices.reduce((sum, p) => sum + p.maxPerDay, 0);
 
+  async function handleDone(id: string) {
+    const res = await onDone(id);
+    if (res?.reward.milestoneHit) {
+      setCelebration({ coinsEarned: res.reward.coinsEarned, coinsBalance: res.reward.coinsBalance });
+    }
+  }
+
   return (
     <section className="space-y-4">
-      {/* Header row */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Today · {completions.dayKey}
+            {TRACKER_STRINGS.todayPrefix} · {completions.dayKey}
           </p>
         </div>
         <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          {totalToday} / {maxTotal} completed
+          {TRACKER_STRINGS.completedSummary(totalToday, maxTotal)}
         </div>
       </div>
 
-      {/* Practice list */}
       <ul className="space-y-3">
         {practices.map((p) => (
           <PracticeRow
@@ -107,11 +115,19 @@ export function PracticesList() {
             practice={p}
             count={byPracticeId[p.id]?.count ?? 0}
             busy={busyKey === p.id}
-            onDone={onDone}
+            onDone={handleDone}
             onUndo={onUndo}
           />
         ))}
       </ul>
+
+      <DailyGoalCelebration
+        open={Boolean(celebration)}
+        coinsEarned={celebration?.coinsEarned ?? 0}
+        totalCoins={celebration?.coinsBalance ?? 0}
+        dailyGoal={DAILY_COMPLETION_GOAL}
+        onDismiss={() => setCelebration(null)}
+      />
     </section>
   );
 }

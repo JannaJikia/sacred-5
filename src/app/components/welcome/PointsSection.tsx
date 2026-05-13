@@ -1,14 +1,15 @@
 import { Check } from "lucide-react";
 import { practices } from "@/app/components/welcome/constants";
+import { WELCOME_DEMO_STRINGS } from "@/config/strings/welcome";
 
 export function PointsSection() {
   return (
     <section className="px-6 py-24" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight">How points work</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{WELCOME_DEMO_STRINGS.pointsSectionTitle}</h2>
           <p className="mt-3" style={{ color: "rgba(255,255,255,0.45)" }}>
-            Each practice earns you points. Stack them daily.
+            {WELCOME_DEMO_STRINGS.pointsSectionLead}
           </p>
         </div>
         <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -29,10 +30,10 @@ export function PointsSection() {
               </div>
               <div className="text-right">
                 <div className="font-bold" style={{ color: "#fde047" }}>
-                  {p.pts}
+                  {p.pointsBadge}
                 </div>
                 <div className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-                  per session
+                  {WELCOME_DEMO_STRINGS.perSession}
                 </div>
               </div>
               <Check className="h-4 w-4" style={{ color: "#4ade80" }} />
