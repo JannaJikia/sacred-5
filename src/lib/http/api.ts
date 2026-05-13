@@ -4,6 +4,7 @@ export type PracticeDto = {
   id: string;
   name: string;
   description: string | null;
+  iconKey: string | null;
   isCustom: boolean;
   points: number;
   maxPerDay: number;
@@ -31,8 +32,32 @@ export function getTodayCompletions() {
   return fetchJson<CompletionsResponse>("/api/completions", { cache: "no-store" });
 }
 
+export type DoneCompletionDto = {
+  id: string;
+  userId: string;
+  practiceId: string;
+  dayKey: string;
+  count: number;
+  lastCompletedAt: string | null;
+  updatedAt: string;
+};
+
+export type DoneResponse = {
+  completion: DoneCompletionDto;
+  dayKey: string;
+  practiceId: string;
+  maxPerDay: number;
+  reward: {
+    milestoneHit: boolean;
+    coinsEarned: number;
+    totalToday: number;
+    coinsBalance: number;
+    celebrationBadge: string | null;
+  };
+};
+
 export function postDone(practiceId: string) {
-  return fetchJson("/api/done", {
+  return fetchJson<DoneResponse>("/api/done", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ practiceId }),
@@ -60,6 +85,7 @@ export function createCustomPractice(params: {
   points?: number;
   maxPerDay?: number;
   description?: string;
+  iconKey?: string;
 }) {
   return fetchJson<{ practice: PracticeDto }>("/api/practices/custom", {
     method: "POST",

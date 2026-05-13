@@ -1,4 +1,5 @@
 import { practices, statWidths } from "@/app/components/welcome/constants";
+import { WELCOME_DEMO_STRINGS } from "@/config/strings/welcome";
 
 export function PracticePreviewSection() {
   return (
@@ -18,7 +19,7 @@ export function PracticePreviewSection() {
               {p.description}
             </div>
             <div className="mt-3 flex items-center gap-2">
-              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.badge}`}>{p.pts}</span>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${p.badge}`}>{p.pointsBadge}</span>
               <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
                 {p.max}
               </span>
@@ -30,10 +31,10 @@ export function PracticePreviewSection() {
       <div className="mt-4 rounded-2xl p-5" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)" }}>
         <div className="flex items-center justify-between">
           <div className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
-            This week
+            {WELCOME_DEMO_STRINGS.thisWeek}
           </div>
           <div className="text-sm font-bold" style={{ color: "#fde047" }}>
-            34 pts · 6 active days
+            {WELCOME_DEMO_STRINGS.sampleTotals}
           </div>
         </div>
         <div className="mt-4 space-y-3">

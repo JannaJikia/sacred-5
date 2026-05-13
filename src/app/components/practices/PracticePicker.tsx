@@ -1,10 +1,11 @@
 "use client";
 
 import { usePracticePicker, type PracticePickerMode } from "./usePracticePicker";
-import { PracticePills } from "./PracticePills";
+import { PracticeFlashGrid } from "./PracticeFlashGrid";
 import { CustomPracticeInput } from "./CustomPracticeInput";
 import { ErrorBanner } from "./ErrorBanner";
 import { PracticePickerActions } from "./PracticePickerActions";
+import { PRACTICES_STRINGS } from "@/config/strings/practices";
 
 export function PracticePicker({ mode }: { mode: PracticePickerMode }) {
   const vm = usePracticePicker({ mode });
@@ -15,27 +16,25 @@ export function PracticePicker({ mode }: { mode: PracticePickerMode }) {
     vm.selectedCount <= 10;
 
   return (
-    <section className="space-y-4">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">
-          {mode === "onboarding" ? "Choose your practices" : "Practices"}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Select what you want to track. You can change this anytime.
-        </p>
-      </div>
+    <section className="space-y-6">
+      {mode === "onboarding" ? (
+        <header className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">{PRACTICES_STRINGS.onboardingTitle}</h1>
+          <p className="text-sm text-muted-foreground">{PRACTICES_STRINGS.manageIntro}</p>
+        </header>
+      ) : (
+        <p className="text-sm leading-relaxed text-muted-foreground">{PRACTICES_STRINGS.manageIntro}</p>
+      )}
 
-      <div className="space-y-2">
-        <div className="text-sm font-medium">Tap to select</div>
+      <div className="space-y-3">
+        <div className="text-sm font-medium text-foreground">{PRACTICES_STRINGS.tapToSelect}</div>
 
         {vm.practices === null ? (
-          <div className="rounded border p-3 text-sm opacity-70">Loading practices…</div>
+          <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-sm text-muted-foreground">
+            {PRACTICES_STRINGS.loading}
+          </div>
         ) : (
-          <PracticePills
-            items={vm.items}
-            selectedIds={vm.selectedIds}
-            onToggle={vm.togglePractice}
-          />
+          <PracticeFlashGrid items={vm.items} selectedIds={vm.selectedIds} onToggle={vm.togglePractice} />
         )}
       </div>
 

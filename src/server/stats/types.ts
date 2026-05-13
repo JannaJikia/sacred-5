@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
+import type { DailyStackedDay } from "./build";
 
 export type Db = PrismaClient | Prisma.TransactionClient;
 
@@ -19,5 +20,7 @@ export type StatsResponse = {
     points: number;
   }>;
   dailySeries: Array<{ dayKey: string; totalCount: number; totalPoints: number }>;
+  /** Present for `today` | `week` | `month` — stacked points per practice for each day in range. */
+  dailyStacked?: DailyStackedDay[];
   chartWindow: null | { days: number; startDayKey: string; endDayKey: string };
 };

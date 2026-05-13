@@ -43,6 +43,7 @@ export async function POST(req: Request) {
         dayKey: result.dayKey,
         practiceId: result.practiceId,
         maxPerDay: result.maxPerDay,
+        reward: result.reward,
       },
       { status: 200 }
     );

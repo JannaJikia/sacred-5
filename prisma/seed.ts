@@ -6,9 +6,9 @@ import { PRACTICES } from "../src/config/practices";
 
 async function main() {
   const users = [
-    { username: "demo1", password: "demo1234" },
-    { username: "demo2", password: "demo1234" },
-    { username: "demo3", password: "demo1234" },
+    { username: "demo1", password: "SacredDemo12!" },
+    { username: "demo2", password: "SacredDemo12!" },
+    { username: "demo3", password: "SacredDemo12!" },
   ];
 
   for (const u of users) {
