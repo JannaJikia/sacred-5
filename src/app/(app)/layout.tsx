@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/welcome");
 
   const hasAny = await prisma.userPractice.findFirst({
     where: { userId: user.id },
@@ -15,5 +15,3 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return <AppShell>{children}</AppShell>;
 }
-
-
