@@ -5,7 +5,7 @@ import { AUTH_STRINGS } from "@/config/strings/auth";
 import { cn } from "@/lib/utils";
 import { PasswordRequirementList } from "./PasswordRequirementList";
 
-type FieldErr = { username?: boolean; password?: boolean; passwordConfirm?: boolean };
+type FieldErr = { email?: boolean; password?: boolean; passwordConfirm?: boolean };
 
 export function AuthRegisterFields({
   password,

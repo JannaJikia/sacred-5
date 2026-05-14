@@ -20,12 +20,12 @@ export function AuthForm({
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fieldError, setFieldError] = useState<{ username?: boolean; password?: boolean; passwordConfirm?: boolean }>(
+  const [fieldError, setFieldError] = useState<{ email?: boolean; password?: boolean; passwordConfirm?: boolean }>(
     {}
   );
   const [busy, setBusy] = useState(false);
@@ -41,30 +41,30 @@ export function AuthForm({
     setFieldError({});
 
     if (mode === "login") {
-      const err = validateLoginInput({ username, password });
+      const err = validateLoginInput({ email, password });
       if (err) return setError(err);
     } else {
-      const fe = validateRegisterInput({ username, password, passwordConfirm });
+      const fe = validateRegisterInput({ email, password, passwordConfirm });
       if (fe) {
         setFieldError({
-          username: Boolean(fe.username),
+          email: Boolean(fe.email),
           password: Boolean(fe.password),
           passwordConfirm: Boolean(fe.passwordConfirm),
         });
-        const first = fe.username ?? fe.password ?? fe.passwordConfirm;
+        const first = fe.email ?? fe.password ?? fe.passwordConfirm;
         if (first) setError(first);
         return;
       }
     }
 
-    const u = username.trim();
+    const e = email.trim().toLowerCase();
     setBusy(true);
     try {
       const endpoint = mode === "login" ? "/api/login" : "/api/register";
       const body =
         mode === "login"
-          ? { username: u, password }
-          : { username: u, password, passwordConfirm };
+          ? { email: e, password }
+          : { email: e, password, passwordConfirm };
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -122,22 +122,24 @@ export function AuthForm({
         noValidate
       >
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="username">
-            {AUTH_STRINGS.usernameLabel}
+          <label className="mb-1.5 block text-sm font-medium text-foreground" htmlFor="email">
+            {AUTH_STRINGS.emailLabel}
           </label>
           <input
-            id="username"
-            name="username"
-            autoComplete="username"
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
             className={cn(
               "w-full rounded-xl border bg-background px-3.5 py-2.5 text-sm transition",
               "placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring",
-              fieldError.username && "border-destructive focus:ring-destructive"
+              fieldError.email && "border-destructive focus:ring-destructive"
             )}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder={AUTH_STRINGS.usernamePlaceholder}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={AUTH_STRINGS.emailPlaceholder}
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}

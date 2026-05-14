@@ -5,10 +5,12 @@ import { setSessionCookie } from "@/lib/cookies";
 import { validationError, invalidCredentials, internalError } from "@/lib/http/errors";
 import { login } from "@/server/auth/login";
 
+import { zodNormalizedEmail } from "@/lib/auth/zodEmail";
+
 export const dynamic = "force-dynamic";
 
 const LoginSchema = z.object({
-  username: z.string().min(3).max(32),
+  email: zodNormalizedEmail,
   password: z.string().min(8).max(128),
 });
 
@@ -32,4 +34,3 @@ export async function POST(req: Request) {
     return internalError();
   }
 }
-

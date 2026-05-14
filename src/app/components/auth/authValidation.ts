@@ -1,5 +1,6 @@
 import { UI_TEXT } from "@/config/uiText";
 import { parseRegisterPassword, passwordConfirmMessage } from "@/lib/auth/passwordPolicy";
+import { zodNormalizedEmail } from "@/lib/auth/zodEmail";
 
 export type AuthMode = "login" | "register";
 
@@ -7,27 +8,33 @@ function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
-export function validateLoginInput(params: { username: string; password: string }): string | null {
-  const u = params.username.trim();
-  if (!u) return UI_TEXT.auth.usernameRequired;
+export function validateLoginInput(params: { email: string; password: string }): string | null {
+  const e = zodNormalizedEmail.safeParse(params.email);
+  if (!e.success) {
+    const msg = e.error.issues[0]?.message;
+    return msg ?? UI_TEXT.auth.invalidEmail;
+  }
   if (!params.password) return UI_TEXT.auth.passwordRequired;
   return null;
 }
 
 export type RegisterFieldErrors = Partial<{
-  username: string;
+  email: string;
   password: string;
   passwordConfirm: string;
 }>;
 
 export function validateRegisterInput(params: {
-  username: string;
+  email: string;
   password: string;
   passwordConfirm: string;
 }): RegisterFieldErrors | null {
   const errors: RegisterFieldErrors = {};
-  const u = params.username.trim();
-  if (!u) errors.username = UI_TEXT.auth.usernameRequired;
+  const e = zodNormalizedEmail.safeParse(params.email);
+  if (!e.success) {
+    const msg = e.error.issues[0]?.message;
+    errors.email = msg ?? UI_TEXT.auth.invalidEmail;
+  }
 
   const pw = parseRegisterPassword(params.password);
   if (!pw.ok) errors.password = pw.message;
@@ -47,8 +54,8 @@ export function authErrorMessage(mode: AuthMode, data: unknown): string {
     switch (code) {
       case "INVALID_CREDENTIALS":
         return UI_TEXT.auth.invalidCredentials;
-      case "USERNAME_TAKEN":
-        return UI_TEXT.auth.usernameTaken;
+      case "EMAIL_TAKEN":
+        return UI_TEXT.auth.emailTaken;
       case "VALIDATION_ERROR":
         return message ?? UI_TEXT.auth.invalidInput;
       default:

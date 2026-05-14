@@ -6,7 +6,7 @@ export type ApiErrorCode =
   | "VALIDATION_ERROR"
   | "INVALID_DAY_KEY"
   | "MAX_PER_DAY_REACHED"
-  | "USERNAME_TAKEN"
+  | "EMAIL_TAKEN"
   | "INTERNAL_ERROR";
 
 export type ApiErrorPayload<TDetails = unknown> = {
@@ -55,8 +55,8 @@ export function maxPerDayReached(details: {
   return jsonError(409, "MAX_PER_DAY_REACHED", "Max per day reached", details);
 }
 
-export function usernameTaken(username?: string) {
-  return jsonError(409, "USERNAME_TAKEN", "Username already taken", username ? { username } : undefined);
+export function emailTaken(email?: string) {
+  return jsonError(409, "EMAIL_TAKEN", "That email is already registered", email ? { email } : undefined);
 }
 
 export function internalError() {

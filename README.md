@@ -1,8 +1,9 @@
 # Sacred 5
 
-A full-stack **daily practice tracker** (walk, cold shower, journal, meditation, and custom habits) built with **Next.js (App Router)**, **Prisma**, and **Postgres**. The app emphasizes **backend correctness** and a polished product UI (themes, coins, weekly stats, onboarding).
+Daily practice tracker (walk, cold shower, journal, meditation, custom habits) — **Next.js (App Router)**, **Prisma 7**, **Postgres**. Session auth, timezone-aware days, atomic tracker rules, themes, coins, stats.
 
-Repository: [github.com/JannaJikia/sacred-5](https://github.com/JannaJikia/sacred-5)
+- **Repository:** [github.com/JannaJikia/sacred-5](https://github.com/JannaJikia/sacred-5)
+- **Live demo (Vercel):** [https://sacred-5.vercel.app](https://sacred-5.vercel.app) — open `/welcome`, then sign in or register. *(If your Vercel project uses another hostname, update this link in the README.)*
 
 ## Screenshots
 
@@ -10,385 +11,151 @@ Repository: [github.com/JannaJikia/sacred-5](https://github.com/JannaJikia/sacre
 | --- | --- |
 | ![Marketing landing](docs/screenshots/marketing.png) | ![Login](docs/screenshots/login.png) |
 
-| Register (`/register`) | Stats (`/stats`, auth required — shows sign-in when logged out) |
+| Register (`/register`) | Stats (`/stats`) |
 | --- | --- |
 | ![Register](docs/screenshots/register.png) | ![Stats](docs/screenshots/stats.png) |
 
-To regenerate images, see [`docs/screenshots/README.md`](docs/screenshots/README.md).
+Regenerate images: [`docs/screenshots/README.md`](docs/screenshots/README.md).
 
-## Live demo
+---
 
-- **Production**: deploy this repo to Vercel (or your host) and set the env vars under [Deploy (Vercel)](#deploy-vercel).
-- **Legacy demo** (older deployment name): [isha-practice-tracker on Vercel](https://isha-practice-tracker.vercel.app/login) — may or may not match this branch; prefer your own Preview URL after connecting the repo.
+## Branches & deploy
 
-## Staging branch
-
-**Integration flow: `staging` first, then `staging` → `main`.**
-
-- **`staging`** is where new work lands first (feature branches should merge here, or commit directly if that is your team norm). Point **Vercel Preview** (and your staging database) at this branch.
-- **`main`** is the production line. Update it only by merging **`staging` → `main`** (pull request or merge after Preview / QA).
-
-Suggested commands when your latest commits are on local `main` but you want them on **`staging`** before touching `main`:
+- **`staging`** — integrate new work first; point **Vercel Preview** (and a staging DB) here.
+- **`main`** — production; merge `staging → main` when ready. **Production** `DATABASE_URL` should only ever hit the prod database.
 
 ```bash
-git fetch origin
-git checkout staging
-git merge origin/main        # optional: start from latest remote main if needed
-git merge main               # bring your local main commits onto staging
-git push origin staging
-git checkout main
+# Ship to staging
+git checkout staging && git merge main && git push origin staging
+
+# Release to production
+git checkout main && git merge staging && git push origin main
 ```
 
-Release to production when ready:
-
-```bash
-git checkout main
-git merge staging            # or open a PR: base main ← compare staging
-git push origin main
-```
-
-If a **hotfix** ships straight to `main`, merge **`main` → `staging`** once afterward so `staging` does not fall behind production.
-
-GitHub Actions CI runs on **pull requests** and on pushes to **`main`** and **`staging`** (see `.github/workflows/ci.yml`).
+CI: `.github/workflows/ci.yml` on PRs and pushes to `main` and `staging`.
 
 ---
 
-## What this project demonstrates
+## Stack
 
-- **Session auth** (httpOnly cookies, token hashing)
-- **Atomic business rules** (max-per-day, undo) enforced via DB transactions
-- **Timezone-safe day keys** and aggregation for stats
-- **Predictable API errors** (standardized error payloads; Zod `treeifyError`)
-- **Quality gates** (integration tests + CI + Git hooks)
-- **Clean boundaries**: Next.js Route Handlers are thin; domain logic lives in `src/server/**`
-- **Concurrency safety**: the “done/undo” logic uses conditional `updateMany` + transactions to remain correct under concurrent requests
-- **Operational realism**: migrations in CI, real Postgres integration tests, and deploy-ready env var strategy
+Next.js 16 · React 19 · TypeScript · Postgres · Prisma 7 (`prisma.config.ts`) · Zod · bcrypt · Luxon (`APP_TZ`) · Tailwind v4 · Radix · lucide-react · Vitest (Postgres integration tests)
 
 ---
 
-## Architecture
+## Data model (short)
 
-**Flow** (happy path):
-
-1. UI calls `src/lib/http/api.ts` (typed client wrappers)
-2. Route Handler validates input with Zod (`z.treeifyError(...)` for consistent details)
-3. Route Handler calls domain logic in `src/server/**`
-4. Domain logic uses Prisma (transactions where needed)
-5. Response returns either a success payload or standardized error payload
-
-**Standard error shape**:
-
-```json
-{
-  "error": { "code": "VALIDATION_ERROR", "message": "Invalid input", "details": { "field": ["msg"] } }
-}
-```
+- **User** — `email` (unique, login id, stored lowercased), `passwordHash`, `coins`
+- **Practice** / **UserPractice** — built-in + custom practices; selection drives Done/Undo
+- **DailyPracticeCompletion** — per user, practice, `dayKey` (`YYYY-MM-DD` in `APP_TZ`)
+- **Session** — `tokenHash` only, `expiresAt`
+- **DailyRewardClaim** — idempotent daily reward bookkeeping
 
 ---
 
-## Tech Stack
+## Security (short)
 
-### Runtime
-
-- **Next.js 16** (App Router, Route Handlers)
-- **React 19**
-- **TypeScript**
-- **Postgres 16**
-- **Prisma 7** (config-based datasource via `prisma.config.ts`)
-
-### Backend / domain
-
-- **Zod**: request/query validation, `z.treeifyError` for structured error details
-- **bcrypt**: password hashing (cost clamped in code)
-- **crypto**: session token generation + token hashing
-- **Luxon**: timezone-aware day keys (`APP_TZ`)
-
-### Frontend/UI (minimal on purpose)
-
-- **Tailwind CSS v4** + `tailwind-merge` + `clsx`
-- **Radix UI** (Separator)
-- **lucide-react** (icons)
-- **sonner** (toasts)
-- **next-themes**
-- **tw-animate-css**
-
-### Tooling / quality
-
-- **Vitest**: integration tests (Node env)
-- **dotenv-cli**: load `.env.test` for `pnpm test`
-- **ESLint** + **Next.js ESLint config**
-- **Husky**: pre-commit / pre-push hooks
-- **GitHub Actions**: CI on PRs + pushes to `main` and `staging`
+- Register/login use **email** + password; weak passwords rejected on register; login accepts `password` min length in the route so older accounts still work.
+- Session cookie is **httpOnly**; token stored hashed. No in-app rate limiting — use Vercel / WAF / Upstash for brute-force protection in production.
 
 ---
 
-## Data Model (Prisma)
+## API
 
-- **User**
-  - `username` unique
-  - `passwordHash`
-  - `coins` (integer; optional gamification balance)
-- **DailyRewardClaim**
-  - Composite primary key `(userId, dayKey, rewardKey)` — idempotent “claimed this reward for this local day” (e.g. daily completion goal)
-  - Cascades when the user is deleted
-- **Practice**
-  - Built-in and user-created practices live in the database
-  - `points`, `maxPerDay` drive scoring + button disabling
-  - Custom practices are `isCustom=true` and `ownerId=user.id`
-- **UserPractice**
-  - Join table for the user’s selected practices
-  - Used to enforce “you can only Done/Undo what you selected”
-- **Session**
-  - Stores **only `tokenHash`** (raw token never stored)
-  - Has `expiresAt` + indexes for cleanup/lookup
-- **DailyPracticeCompletion**
-  - `(userId, practiceId, dayKey)` unique
-  - `dayKey` is `"YYYY-MM-DD"` computed in `APP_TZ`
-  - `count`, `lastCompletedAt`, `updatedAt`
+| Method | Path | Notes |
+|--------|------|--------|
+| POST | `/api/register` | `{ email, password, passwordConfirm }` → session cookie |
+| POST | `/api/login` | `{ email, password }` → session cookie |
+| POST | `/api/logout` | Clears session |
+| GET | `/api/me` | Current user or 401 |
+| GET/POST | `/api/practices`, `/api/practices/custom` | List / create custom |
+| GET/POST | `/api/onboarding`, `/api/onboarding/save` | Selection (max 10) |
+| GET | `/api/completions?dayKey=` | Day grid |
+| POST | `/api/done`, `/api/undo` | Increment / decrement (max per day) |
+| GET | `/api/stats?...` | Aggregates |
+
+Errors: JSON `{ "error": { "code", "message", "details?" } }` (e.g. `VALIDATION_ERROR`, `EMAIL_TAKEN`, `INVALID_CREDENTIALS`).
 
 ---
 
-## Security notes
+## Local development
 
-- **Password policy** is enforced both in `POST /api/register` (Zod) and in `src/server/auth/register.ts` (`parseRegisterPassword`) so domain code cannot accidentally persist a weak password if a new caller bypasses the route.
-- **Login** still accepts passwords from `min(8)` in the route schema so existing accounts (e.g. seeded demos) are not locked out; new accounts must meet the stronger register policy (12+ chars, upper, digit, symbol).
-- **Rate limiting** is not implemented in-app. For production, add edge/WAF rules, Vercel firewall, or a shared store (e.g. Redis / Upstash) for `POST /api/login` and `POST /api/register` to throttle brute force and credential stuffing.
-
----
-
-## Business Rules (core logic)
-
-### “Done” (increment)
-
-Domain entrypoint: `src/server/tracker/done.ts`  
-Atomic core: `src/server/tracker/applyCompletion.ts`
-
-- Enforces \(count + delta \le maxPerDay\)
-- After a successful increment, aggregates **total completions for that user and `dayKey`** across all practices; when the total first reaches the configured daily goal, records a **`DailyRewardClaim`** and increments **`User.coins`** once (idempotent for that day and reward key).
-- Concurrency-safe approach:
-  - Conditional increment via `updateMany(where count <= maxPerDay - delta)`
-  - If missing row, `createMany({ skipDuplicates: true })` to avoid transaction abort due to unique violations (Postgres aborts a transaction on *any* statement error)
-  - Retry increment; otherwise return `max_reached`
-
-### “Undo” (decrement)
-
-Domain entrypoint: `src/server/tracker/undo.ts`  
-Atomic core: `src/server/completions/undoCompletion.ts`
-
-- If count stays \(\ge 1\), decrements via conditional `updateMany(where count > delta)`
-- If undo would drop to \(\le 0\), deletes row
-- If row doesn’t exist, returns noop
-
----
-
-## API (Route Handlers)
-
-### Auth
-
-- `POST /api/register` → `{ username, password, passwordConfirm }` (policy + match validated in Zod and again in `register()`); create user + set session cookie
-- `POST /api/login` → validate credentials + set session cookie
-- `POST /api/logout` → delete session + clear cookie
-- `GET /api/me` → current user (401 if not logged in)
-
-### Tracker / Stats
-
-- `GET /api/practices` → list practices from DB (built-in + your custom)
-- `POST /api/practices/custom` → create a custom practice (also auto-selects it)
-- `GET /api/onboarding` → current selected practice IDs
-- `POST /api/onboarding/save` → replace selected practices (**max 10**)
-- `GET /api/completions?dayKey=YYYY-MM-DD` → day completions (defaults to today in `APP_TZ`)
-- `POST /api/done` `{ practiceId, delta? }` → increment (max-per-day enforced)
-- `POST /api/undo` `{ practiceId, delta? }` → decrement (deletes row at 0)
-- `GET /api/stats?range=today|week|month|all&dayKey=YYYY-MM-DD&days=7..365` → aggregated stats
-
----
-
-## Project Structure (high signal)
-
-```
-.
-├─ docker-compose.yml
-├─ prisma/
-│  ├─ schema.prisma
-│  ├─ migrations/
-│  └─ seed.ts
-├─ prisma.config.ts
-├─ src/
-│  ├─ app/
-│  │  └─ api/                 # Next.js Route Handlers (thin)
-│  ├─ config/                 # Practices config + UI text
-│  ├─ lib/                    # DB, auth helpers, time helpers, HTTP client
-│  └─ server/                 # Domain logic (transactions, invariants)
-│     ├─ auth/
-│     ├─ stats/
-│     ├─ tracker/
-│     └─ __tests__/           # Integration tests (real Postgres)
-└─ README.md
-```
-
----
-
-## Local Development
-
-### Requirements
-
-- Node.js **20+**
-- pnpm **9+**
-- Docker (for Postgres)
-
-### 1) Install
+**Requirements:** Node 20+, pnpm 9+, Docker (for Postgres).
 
 ```bash
 pnpm install
-```
-
-### 2) Start Postgres (Docker)
-
-```bash
 docker compose up -d
 ```
 
-### 3) Configure env
-
-Create `.env` in the repo root:
+`.env` (root):
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/isha_practice?schema=public"
 APP_TZ="Asia/Tbilisi"
 BCRYPT_COST="10"
 SESSION_TTL_DAYS="30"
-SESSION_COOKIE_NAME="isha_session"
 ```
 
-Notes:
-
-- `DATABASE_URL` must be a valid URL. If you see errors referencing host `"base"`, you likely exported `DATABASE_URL` in your shell; run `unset DATABASE_URL` and restart.
-
-### 4) Migrate + seed
-
-This project stores practice definitions in the database (`Practice` table). Seeding creates the built-in practices.
+Then:
 
 ```bash
 pnpm db:migrate
 pnpm db:seed
-```
-
-### 5) Run
-
-```bash
 pnpm dev
 ```
 
-Open:
+Useful routes: `/welcome`, `/login`, `/register` → onboarding, `/` tracker, `/stats`, `/practices`.
 
-- `/login` to register/login
-- `/` for the tracker UI
-- `/practices` to manage your selected practices later
-- `/onboarding` is used for first-time setup (new registrations redirect here)
+If Prisma complains about host `"base"`, you likely have a bad `DATABASE_URL` in the shell — `unset DATABASE_URL` and rely on `.env`.
 
 ---
 
-## Testing (integration)
+## Tests
 
-Tests run against a **real Postgres test database** via Prisma transactions.
+Integration tests need a **test DB** (e.g. `isha_practice_test`) and `.env.test` with `DATABASE_URL` pointing at it. `pnpm test` runs migrate deploy + seed + Vitest (see `package.json`).
 
-### 1) Create the test database
+- `pnpm test` loads `.env.test` via `dotenv-cli`, runs `pnpm db:deploy` + `pnpm db:seed` before Vitest, and asserts `DATABASE_URL` contains `isha_practice_test`.
 
-With the Docker DB running:
-
-```bash
-docker exec -it isha_tracker_db psql -U postgres -c "CREATE DATABASE isha_practice_test;"
-```
-
-### 2) Create `.env.test`
-
-Create `.env.test` in the repo root:
-
-```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/isha_practice_test?schema=public"
-```
-
-### 3) Apply migrations + seed to the test DB
-
-```bash
-pnpm db:deploy
-pnpm db:seed
-```
-
-### 4) Run tests
-
-```bash
-pnpm test
-```
-
-Notes:
-
-- `pnpm test` loads `.env.test` via `dotenv-cli`.
-- `pnpm test` also runs `pnpm db:deploy` + `pnpm db:seed` before Vitest, so your test DB stays up to date.
-- The integration suite asserts `DATABASE_URL` contains `isha_practice_test` as a safety check.
-
----
-
-## Quality Gates (local)
-
-This repo uses **Husky** to run checks automatically:
-
-- `pre-commit` → `pnpm check` (eslint + typecheck)
-- `pre-push` → `pnpm test` (integration tests)
-
-If you need to bypass hooks temporarily (not recommended), you can use `git commit --no-verify` / `git push --no-verify`.
+Husky: `pre-commit` → `pnpm check`; `pre-push` → `pnpm test` (needs DB + `.env.test`). Use `git commit --no-verify` / `git push --no-verify` only if you must bypass hooks.
 
 ---
 
 ## CI (GitHub Actions)
 
-Workflow: `.github/workflows/ci.yml`
-
-- Runs on PRs and pushes to `main` and `staging`
-- Steps:
-  - `pnpm install --frozen-lockfile`
-  - `pnpm check`
-  - Postgres service
-  - `pnpm db:deploy`
-  - `pnpm test`
+`.github/workflows/ci.yml` — PRs and pushes to `main` / `staging`: `pnpm install --frozen-lockfile`, `pnpm check`, Postgres service, `pnpm db:deploy`, `pnpm test`.
 
 ---
 
 ## Deploy (Vercel)
 
-### Required env vars
+**Demo:** [sacred-5.vercel.app](https://sacred-5.vercel.app)
 
-Set these in **Vercel → Project → Settings → Environment Variables**:
+Point **Preview** at branch **`staging`** and use a **staging** `DATABASE_URL`; **Production** (from `main`) should use the production database only.
 
-- `DATABASE_URL` (Production + Preview)
-- `APP_TZ`
-- `BCRYPT_COST`
-- `SESSION_TTL_DAYS`
-- `SESSION_COOKIE_NAME`
+### Environment variables
 
-### Staging / Preview
+| Variable | Required | Notes |
+|----------|----------|--------|
+| `DATABASE_URL` | **Yes** | Use different URLs for **Production** vs **Preview** when using separate databases. |
+| `APP_TZ` | No | Default `Asia/Tbilisi` in code. |
+| `BCRYPT_COST` | No | Default `10` (clamped in code). |
+| `SESSION_TTL_DAYS` | No | Default `30`. |
 
-Use the **`staging`** workflow above: Preview should track **`staging`**, not `main`. In Vercel, set **Preview** `DATABASE_URL` (and other vars) to a **staging Postgres** instance; keep **Production** (from `main`) pointed at production only.
+Build is driven by **`vercel.json`**: `pnpm run vercel-build` → `prisma generate` + `prisma migrate deploy` + `next build`.
 
-No code changes are required beyond env configuration and running migrations on deploy (`pnpm db:deploy && pnpm build` or your `vercel-build` script).
-
-### Migrations on deploy
-
-Set **Build Command** to:
-
-```bash
-pnpm db:deploy && pnpm build
-```
-
----
+If a migration fails in production, use [Prisma’s production troubleshooting](https://www.prisma.io/docs/guides/migrate/production-troubleshooting) (`migrate resolve`, inspect `_prisma_migrations`) before redeploying — do not guess `--rolled-back` if later migrations already applied.
 
 ## Scripts
 
-- `pnpm dev` – start dev server
-- `pnpm build` / `pnpm start` – production build/run
-- `pnpm lint` – eslint
-- `pnpm typecheck` – tsc --noEmit
-- `pnpm check` – lint + typecheck
-- `pnpm test` – run tests (Vitest, loads `.env.test`)
-- `pnpm test:watch` – watch mode
-- `pnpm db:*` – Prisma helpers (`generate`, `migrate`, `deploy`, `seed`, etc.)
+`pnpm dev` · `pnpm build` / `pnpm start` · `pnpm check` (lint + typecheck) · `pnpm test` · `pnpm db:*` (Prisma helpers)
+
+---
+
+## Layout (where to look)
+
+```
+prisma/          schema, migrations, seed
+src/app/api/     Route handlers (thin)
+src/server/      Domain logic (tracker, stats, auth)
+src/lib/         db, auth, cookies, time, HTTP helpers
+src/config/      practices, strings, UI copy
+```

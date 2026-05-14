@@ -5,19 +5,24 @@ import { prisma } from "../src/lib/db";
 import { PRACTICES } from "../src/config/practices";
 
 async function main() {
+  // After username→email migration, old demo rows may still be `demo1` etc. Remove so upsert uses real emails.
+  await prisma.user.deleteMany({
+    where: { email: { in: ["demo1", "demo2", "demo3"] } },
+  });
+
   const users = [
-    { username: "demo1", password: "SacredDemo12!" },
-    { username: "demo2", password: "SacredDemo12!" },
-    { username: "demo3", password: "SacredDemo12!" },
+    { email: "demo1@example.com", password: "SacredDemo12!" },
+    { email: "demo2@example.com", password: "SacredDemo12!" },
+    { email: "demo3@example.com", password: "SacredDemo12!" },
   ];
 
   for (const u of users) {
     const passwordHash = await bcrypt.hash(u.password, 10);
 
     await prisma.user.upsert({
-      where: { username: u.username },
+      where: { email: u.email },
       update: { passwordHash },
-      create: { username: u.username, passwordHash },
+      create: { email: u.email, passwordHash },
     });
   }
 

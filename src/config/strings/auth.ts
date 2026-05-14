@@ -1,10 +1,10 @@
 export const AUTH_STRINGS = {
   signInTab: "Sign in",
   createAccountTab: "Create account",
-  usernameLabel: "Username",
+  emailLabel: "Email",
   passwordLabel: "Password",
   confirmPasswordLabel: "Confirm password",
-  usernamePlaceholder: "your_username",
+  emailPlaceholder: "you@example.com",
   passwordPlaceholder: "••••••••••••",
   signingIn: "Signing in…",
   creatingAccount: "Creating account…",
