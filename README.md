@@ -115,7 +115,9 @@ Integration tests need a **test DB** (e.g. `isha_practice_test`) and `.env.test`
 
 - `pnpm test` loads `.env.test` via `dotenv-cli`, runs `pnpm db:deploy` + `pnpm db:seed` before Vitest, and asserts `DATABASE_URL` contains `isha_practice_test`.
 
-Husky: `pre-commit` → `pnpm check`; `pre-push` → `pnpm test` (needs DB + `.env.test`). Use `git commit --no-verify` / `git push --no-verify` only if you must bypass hooks.
+Husky: `pre-commit` → `pnpm check`; **`pre-push` → `pnpm check` only** (lint + typecheck, no DB). Run **`pnpm test`** locally when Docker is up and `.env.test` points at **`localhost`** / `isha_practice_test`. **GitHub Actions** still runs **`pnpm test`** on every push to `main` / `staging`.
+
+Use `git commit --no-verify` / `git push --no-verify` only if you must bypass hooks.
 
 ---
 
@@ -143,6 +145,8 @@ Point **Preview** at branch **`staging`** and use a **staging** `DATABASE_URL`; 
 Build is driven by **`vercel.json`**: `pnpm run vercel-build` → `prisma generate` + `prisma migrate deploy` + `next build`.
 
 If a migration fails in production, use [Prisma’s production troubleshooting](https://www.prisma.io/docs/guides/migrate/production-troubleshooting) (`migrate resolve`, inspect `_prisma_migrations`) before redeploying — do not guess `--rolled-back` if later migrations already applied.
+
+---
 
 ## Scripts
 
