@@ -25,7 +25,7 @@ describe("integration: tracker business rules", () => {
 
   it("applyCompletion creates + increments + then blocks at maxPerDay", async () => {
     const user = await prisma.user.create({
-      data: { username: "u_apply", passwordHash: "x" },
+      data: { email: "u_apply@test.local", passwordHash: "x" },
       select: { id: true },
     });
 
@@ -60,7 +60,7 @@ describe("integration: tracker business rules", () => {
 
   it("undoCompletion decrements, deletes, and noops", async () => {
     const user = await prisma.user.create({
-      data: { username: "u_undo", passwordHash: "x" },
+      data: { email: "u_undo@test.local", passwordHash: "x" },
       select: { id: true },
     });
 
@@ -96,7 +96,7 @@ describe("integration: tracker business rules", () => {
 
   it("applyCompletion returns max_reached when delta > maxPerDay", async () => {
     const user = await prisma.user.create({
-      data: { username: "u_test3", passwordHash: "x" },
+      data: { email: "u_test3@test.local", passwordHash: "x" },
       select: { id: true },
     });
 
@@ -123,7 +123,7 @@ describe("integration: tracker business rules", () => {
 
   it("undoCompletion deletes when count equals delta (exactly reaches 0)", async () => {
     const user = await prisma.user.create({
-      data: { username: "u_test4", passwordHash: "x" },
+      data: { email: "u_test4@test.local", passwordHash: "x" },
       select: { id: true },
     });
 
@@ -154,7 +154,7 @@ describe("integration: tracker business rules", () => {
 
   it("done awards coins once when daily completion total crosses goal", async () => {
     const user = await prisma.user.create({
-      data: { username: "u_done_goal", passwordHash: "x", coins: 0 },
+      data: { email: "u_done_goal@test.local", passwordHash: "x", coins: 0 },
       select: { id: true },
     });
 

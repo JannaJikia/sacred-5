@@ -2,20 +2,17 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { setSessionCookie } from "@/lib/cookies";
-import { validationError, internalError, usernameTaken } from "@/lib/http/errors";
+import { validationError, internalError, emailTaken } from "@/lib/http/errors";
 import { register } from "@/server/auth/register";
 import { registerPasswordSchema } from "@/lib/auth/passwordPolicy";
+import { zodNormalizedEmail } from "@/lib/auth/zodEmail";
 import { AUTH_STRINGS } from "@/config/strings/auth";
 
 export const dynamic = "force-dynamic";
 
 const RegisterSchema = z
   .object({
-    username: z
-      .string()
-      .min(3)
-      .max(32)
-      .regex(/^[a-zA-Z0-9_]+$/, "Use letters/numbers/_ only"),
+    email: zodNormalizedEmail,
     password: z.string().max(128),
     passwordConfirm: z.string().max(128),
   })
@@ -44,16 +41,16 @@ export async function POST(req: Request) {
     return validationError(z.treeifyError(parsed.error), "Invalid input");
   }
 
-  const { username, password } = parsed.data;
+  const { email, password } = parsed.data;
 
   try {
-    const result = await register({ username, password });
+    const result = await register({ email, password });
 
     if (result.kind === "invalid_password") {
       return validationError({ password: [result.message] }, "Invalid input");
     }
 
-    if (result.kind === "username_taken") return usernameTaken(username);
+    if (result.kind === "email_taken") return emailTaken(email);
 
     await setSessionCookie(result.token, result.expiresAt);
     return NextResponse.json({ user: result.user }, { status: 201 });

@@ -2,10 +2,10 @@ export const UI_TEXT = {
   auth: {
     pleaseLogin: "Please log in",
     loginCta: "Login",
-    usernameRequired: "Username is required",
+    invalidEmail: "Enter a valid email address",
     passwordRequired: "Password is required",
-    invalidCredentials: "Invalid username or password",
-    usernameTaken: "That username is already taken",
+    invalidCredentials: "Invalid email or password",
+    emailTaken: "That email is already registered",
     invalidInput: "Invalid input",
     loginTitle: "Login",
     registerTitle: "Create account",

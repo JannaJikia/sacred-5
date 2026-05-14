@@ -1,2 +1,3 @@
-pnpm -s test
-
+# Integration tests need a reachable Postgres (see README `.env.test` + Docker).
+# CI runs `pnpm test` on every push to `main` / `staging`; this hook stays fast/offline-friendly.
+pnpm -s check
