@@ -1,6 +1,7 @@
 export const PAGE_STRINGS = {
   dashboardTitle: "Dashboard",
   dashboardSubtitle: "Log your practices for today",
+  dashboardStatsLink: "See your full stats",
   statsTitle: "Stats",
   statsSubtitle: "Your progress at a glance",
   practicesTitle: "Practices",
