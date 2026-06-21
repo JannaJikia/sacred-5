@@ -10,6 +10,11 @@ export const TRACKER_STRINGS = {
   markDone: "Mark done",
   done: "Done",
   busyEllipsis: "…",
+  sessionsSummary: (done: number, max: number) => `${done}/${max} sessions`,
+  goalTitle: "Today's goal",
+  goalHint: (reward: number, goal: number) => `Earn +${reward} coins for ${goal} completions`,
+  goalReachedTitle: "Daily goal reached",
+  goalReachedHint: (reward: number) => `+${reward} coins earned today`,
 } as const;
 
 export const CELEBRATION_STRINGS = {

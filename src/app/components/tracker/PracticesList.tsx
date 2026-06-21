@@ -2,12 +2,41 @@
 
 import { useState } from "react";
 import { PracticeRow } from "./PracticeRow";
+import { PracticeProgressBar } from "./PracticeProgressBar";
 import { useTrackerData } from "./useTrackerData";
 import { useTrackerActions } from "./useTrackerActions";
 import { DailyGoalCelebration } from "./DailyGoalCelebration";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Check, RefreshCw, Target } from "lucide-react";
 import { TRACKER_STRINGS } from "@/config/strings/tracker";
-import { DAILY_COMPLETION_GOAL } from "@/config/rewards";
+import { DAILY_COMPLETION_GOAL, MILESTONE_REWARD_COINS } from "@/config/rewards";
+
+function DailyGoalProgress({ done, goal, reward }: { done: number; goal: number; reward: number }) {
+  const reached = done >= goal;
+  const shown = Math.min(done, goal);
+  return (
+    <div className="rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            {reached ? <Check className="h-4 w-4" /> : <Target className="h-4 w-4" />}
+          </span>
+          <div>
+            <div className="text-sm font-semibold text-foreground">
+              {reached ? TRACKER_STRINGS.goalReachedTitle : TRACKER_STRINGS.goalTitle}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {reached ? TRACKER_STRINGS.goalReachedHint(reward) : TRACKER_STRINGS.goalHint(reward, goal)}
+            </div>
+          </div>
+        </div>
+        <div className="text-sm font-bold tabular-nums text-primary">
+          {shown}/{goal}
+        </div>
+      </div>
+      <PracticeProgressBar className="mt-3" fraction={shown / goal} barClassName="bg-primary" />
+    </div>
+  );
+}
 
 function PracticeRowSkeleton() {
   return (
@@ -116,15 +145,15 @@ export function PracticesList() {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {TRACKER_STRINGS.todayPrefix} · {completions.dayKey}
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          {TRACKER_STRINGS.completedSummary(totalToday, maxTotal)}
-        </div>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {TRACKER_STRINGS.todayPrefix} · {completions.dayKey}
+        </p>
+        <span className="text-xs tabular-nums text-muted-foreground">
+          {TRACKER_STRINGS.sessionsSummary(totalToday, maxTotal)}
+        </span>
       </div>
+
+      <DailyGoalProgress done={totalToday} goal={DAILY_COMPLETION_GOAL} reward={MILESTONE_REWARD_COINS} />
 
       <ul className="grid grid-cols-2 gap-3">
         {practices.map((p) => (
