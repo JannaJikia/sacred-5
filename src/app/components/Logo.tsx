@@ -1,8 +1,33 @@
 /**
- * Sacred 5 — logo mark
- * An "S5" monogram seal on the forest/amber brand.
- * Used in the sidebar, landing page nav, and auth pages.
+ * Sacred 5 — brand logo.
+ * A radiating sunburst mark + a serif "Sacred 5" wordmark.
+ * The mark uses `currentColor`, so it inherits the surrounding text color
+ * (cream on the marketing surface, foreground in the themed app).
  */
+
+const RAYS = 12;
+const CENTER = 32;
+
+function sunburstRays() {
+  return Array.from({ length: RAYS }, (_, i) => {
+    const angle = (i / RAYS) * Math.PI * 2 - Math.PI / 2;
+    const long = i % 2 === 0;
+    const inner = 5.5;
+    const outer = long ? 28 : 19;
+    const half = 2.1;
+    const px = Math.cos(angle);
+    const py = Math.sin(angle);
+    const nx = -py;
+    const ny = px;
+    const bx = CENTER + px * inner;
+    const by = CENTER + py * inner;
+    const tip = `${(CENTER + px * outer).toFixed(2)},${(CENTER + py * outer).toFixed(2)}`;
+    const a = `${(bx + nx * half).toFixed(2)},${(by + ny * half).toFixed(2)}`;
+    const b = `${(bx - nx * half).toFixed(2)},${(by - ny * half).toFixed(2)}`;
+    return `${a} ${b} ${tip}`;
+  });
+}
+
 export function LogoMark({ size = 32 }: { size?: number }) {
   return (
     <svg
@@ -13,47 +38,24 @@ export function LogoMark({ size = 32 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Sacred 5 logo"
     >
-      <defs>
-        <linearGradient id="lm-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#14532d" />
-          <stop offset="100%" stopColor="#0a3018" />
-        </linearGradient>
-        <linearGradient id="lm-mono" x1="18" y1="14" x2="48" y2="52" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fde68a" />
-          <stop offset="100%" stopColor="#eab308" />
-        </linearGradient>
-      </defs>
-
-      {/* Seal */}
-      <rect width="64" height="64" rx="16" fill="url(#lm-bg)" />
-      {/* Subtle inner edge highlight for depth */}
-      <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#ffffff" strokeOpacity="0.06" />
-
-      {/* S5 monogram */}
-      <text
-        x="32"
-        y="44"
-        textAnchor="middle"
-        fontFamily="var(--font-bricolage), ui-sans-serif, system-ui, sans-serif"
-        fontWeight="700"
-        fontSize="30"
-        letterSpacing="-1.5"
-        fill="url(#lm-mono)"
-      >
-        S5
-      </text>
+      {sunburstRays().map((points, i) => (
+        <polygon key={i} points={points} fill="currentColor" />
+      ))}
+      <circle cx={CENTER} cy={CENTER} r={4} fill="currentColor" />
     </svg>
   );
 }
 
-/** Full wordmark — logo mark + "Sacred 5" text side by side */
-export function LogoWordmark({ size = 32 }: { size?: number }) {
+/** Full wordmark — sunburst mark + the serif "Sacred 5" wordmark, with an optional sub-line. */
+export function LogoWordmark({ size = 32, subtitle }: { size?: number; subtitle?: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <LogoMark size={size} />
-      <div>
-        <div className="font-display text-sm font-semibold leading-tight tracking-tight">Sacred 5</div>
-        <div className="text-xs text-muted-foreground leading-tight">Daily practices</div>
+      <div className="leading-tight">
+        <div className="font-serif font-semibold tracking-tight" style={{ fontSize: Math.round(size * 0.62) }}>
+          Sacred 5
+        </div>
+        {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
       </div>
     </div>
   );

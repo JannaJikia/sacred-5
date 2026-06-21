@@ -48,7 +48,7 @@ export function AppShell({
           <aside className="hidden md:block">
             <div className="sticky top-6 space-y-2">
               <div className="mb-6 flex items-center justify-between gap-2 px-1">
-                <LogoWordmark size={36} />
+                <LogoWordmark size={32} subtitle="Daily practices" />
                 <ThemeToggle />
               </div>
 

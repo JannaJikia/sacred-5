@@ -7,7 +7,7 @@ export function WelcomeFooter() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-5 sm:flex-row">
         <div className="flex items-center gap-2.5">
           <LogoMark size={26} />
-          <span className="font-display text-base font-semibold" style={{ color: "var(--mkt-text)" }}>
+          <span className="font-serif text-lg font-semibold" style={{ color: "var(--mkt-text)" }}>
             Sacred 5
           </span>
         </div>
