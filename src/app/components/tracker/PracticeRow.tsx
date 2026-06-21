@@ -84,7 +84,8 @@ export function PracticeRow({
             "flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-all",
             disabledDone
               ? "cursor-not-allowed bg-muted text-muted-foreground opacity-40"
-              : `bg-gradient-to-r ${style.gradient} text-white shadow-sm hover:opacity-90 active:scale-95`
+              : // Dark ink reads on every per-practice hue (~6-14:1); white failed WCAG on the bright gradients.
+                `bg-gradient-to-r ${style.gradient} text-zinc-950 shadow-sm hover:opacity-90 active:scale-95`
           )}
           disabled={disabledDone}
           onClick={() => void onDone(practice.id)}
