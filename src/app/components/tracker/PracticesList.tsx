@@ -28,21 +28,19 @@ function PracticeRowSkeleton() {
 
 export function PracticesList() {
   const { practices, completions, byPracticeId, error, loading, reload } = useTrackerData();
-  const { busyKey, actionError, onDone, onUndo } = useTrackerActions(reload);
+  const { busyKey, onDone, onUndo } = useTrackerActions(reload);
   const [celebration, setCelebration] = useState<{
     coinsEarned: number;
     coinsBalance: number;
   } | null>(null);
 
-  const msg = actionError ?? error;
-
-  if (msg && !loading) {
+  if (error && !loading) {
     return (
       <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
         <div className="flex items-start gap-3">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-destructive">{msg}</p>
+            <p className="text-sm font-medium text-destructive">{error}</p>
             <div className="mt-3 flex items-center gap-3">
               <button
                 className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
