@@ -33,6 +33,8 @@ export function PracticesList() {
     coinsEarned: number;
     coinsBalance: number;
   } | null>(null);
+  // Per-practice optimistic deltas, cleared once the server reload reconciles (or rolls back on failure).
+  const [optimistic, setOptimistic] = useState<Record<string, number>>({});
 
   if (error && !loading) {
     return (
@@ -75,13 +77,39 @@ export function PracticesList() {
     );
   }
 
-  const totalToday = Object.values(byPracticeId).reduce((sum, c) => sum + c.count, 0);
+  const countFor = (id: string, max: number) =>
+    Math.max(0, Math.min(max, (byPracticeId[id]?.count ?? 0) + (optimistic[id] ?? 0)));
+
+  const counts = Object.fromEntries(practices.map((p) => [p.id, countFor(p.id, p.maxPerDay)]));
+  const totalToday = practices.reduce((sum, p) => sum + counts[p.id], 0);
   const maxTotal = practices.reduce((sum, p) => sum + p.maxPerDay, 0);
 
+  function clearOptimistic(id: string) {
+    setOptimistic((d) => {
+      const next = { ...d };
+      delete next[id];
+      return next;
+    });
+  }
+
   async function handleDone(id: string) {
-    const res = await onDone(id);
-    if (res?.reward.milestoneHit) {
-      setCelebration({ coinsEarned: res.reward.coinsEarned, coinsBalance: res.reward.coinsBalance });
+    setOptimistic((d) => ({ ...d, [id]: (d[id] ?? 0) + 1 }));
+    try {
+      const res = await onDone(id);
+      if (res?.reward.milestoneHit) {
+        setCelebration({ coinsEarned: res.reward.coinsEarned, coinsBalance: res.reward.coinsBalance });
+      }
+    } finally {
+      clearOptimistic(id);
+    }
+  }
+
+  async function handleUndo(id: string) {
+    setOptimistic((d) => ({ ...d, [id]: (d[id] ?? 0) - 1 }));
+    try {
+      await onUndo(id);
+    } finally {
+      clearOptimistic(id);
     }
   }
 
@@ -103,10 +131,10 @@ export function PracticesList() {
           <PracticeRow
             key={p.id}
             practice={p}
-            count={byPracticeId[p.id]?.count ?? 0}
+            count={counts[p.id]}
             busy={busyKey === p.id}
             onDone={handleDone}
-            onUndo={onUndo}
+            onUndo={handleUndo}
           />
         ))}
       </ul>
