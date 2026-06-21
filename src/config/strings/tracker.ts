@@ -8,6 +8,7 @@ export const TRACKER_STRINGS = {
   notStarted: "Not started today",
   undo: "Undo",
   markDone: "Mark done",
+  logShort: "Log",
   done: "Done",
   busyEllipsis: "…",
   sessionsSummary: (done: number, max: number) => `${done}/${max} sessions`,

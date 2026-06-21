@@ -94,8 +94,8 @@ export function PracticeRow({
             <span className="animate-pulse">{TRACKER_STRINGS.busyEllipsis}</span>
           ) : (
             <>
-              <Plus className="h-4 w-4" />
-              {isComplete ? TRACKER_STRINGS.done : TRACKER_STRINGS.markDone}
+              <Plus className="h-4 w-4 shrink-0" />
+              <span className="truncate">{isComplete ? TRACKER_STRINGS.done : TRACKER_STRINGS.logShort}</span>
             </>
           )}
         </button>
