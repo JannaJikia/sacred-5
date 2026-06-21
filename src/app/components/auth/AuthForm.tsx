@@ -198,7 +198,7 @@ export function AuthForm({
         <button
           type="submit"
           className={cn(
-            "relative w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all",
+            "relative w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all",
             "bg-primary hover:bg-primary/90 active:scale-[0.98]",
             "disabled:cursor-not-allowed disabled:opacity-60"
           )}

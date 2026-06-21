@@ -1,42 +1,35 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { AuthForm } from "@components/auth/AuthForm";
 import { LogoMark } from "@/app/components/Logo";
 
 export default function RegisterPage() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12">
-      {/* Background glow */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div
-          className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full blur-3xl"
-          style={{ background: "oklch(0.60 0.17 145 / 0.1)" }}
-        />
-      </div>
+    <main className="relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-background px-4 py-12">
+      {/* Single soft brand glow behind the card */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-[-10%] h-[420px] w-[640px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
+        aria-hidden
+      />
 
       <div className="relative w-full max-w-sm">
-        {/* Logo */}
         <div className="mb-8 flex flex-col items-center text-center">
           <LogoMark size={52} />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight">Start your journey</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Create a free account, then choose your practices
-          </p>
+          <h1 className="mt-4 font-display text-2xl font-bold tracking-tight">Start your practice</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">Create a free account, then choose your practices</p>
         </div>
 
-        {/* Form card */}
         <div className="rounded-2xl border bg-card p-6 shadow-sm">
-          {/* After register → onboarding to pick practices */}
+          {/* After register, onboarding lets the user pick practices */}
           <AuthForm initialMode="register" successRedirectTo="/onboarding" />
         </div>
 
-        {/* Back link */}
-        <div className="mt-6 text-center text-sm text-muted-foreground">
+        <div className="mt-6 text-center text-sm">
           <Link
             href="/welcome"
-            className="underline underline-offset-2 transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
           >
-            ← Back to home
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Back to home
           </Link>
         </div>
       </div>
