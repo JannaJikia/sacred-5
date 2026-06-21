@@ -7,6 +7,7 @@ export const NAV_STRINGS = {
   leaderboard: "Leaderboard",
   logout: "Logout",
   coins: "Coins",
+  account: "Account",
 } as const;
 
 export const APP_NAV_LINKS = [
