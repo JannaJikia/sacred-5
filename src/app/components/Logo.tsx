@@ -1,5 +1,6 @@
 /**
  * Sacred 5 — logo mark
+ * An "S5" monogram seal on the forest/amber brand.
  * Used in the sidebar, landing page nav, and auth pages.
  */
 export function LogoMark({ size = 32 }: { size?: number }) {
@@ -17,27 +18,30 @@ export function LogoMark({ size = 32 }: { size?: number }) {
           <stop offset="0%" stopColor="#14532d" />
           <stop offset="100%" stopColor="#0a3018" />
         </linearGradient>
-        <linearGradient id="lm-num" x1="16" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fef08a" />
+        <linearGradient id="lm-mono" x1="18" y1="14" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fde68a" />
           <stop offset="100%" stopColor="#eab308" />
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="14" fill="url(#lm-bg)" />
-      <circle cx="50" cy="14" r="7" fill="#16a34a" opacity="0.4" />
-      <circle cx="56" cy="10" r="4" fill="#16a34a" opacity="0.2" />
+
+      {/* Seal */}
+      <rect width="64" height="64" rx="16" fill="url(#lm-bg)" />
+      {/* Subtle inner edge highlight for depth */}
+      <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#ffffff" strokeOpacity="0.06" />
+
+      {/* S5 monogram */}
       <text
-        x="33"
-        y="47"
+        x="32"
+        y="44"
         textAnchor="middle"
-        fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
-        fontWeight="900"
-        fontSize="40"
-        letterSpacing="-2"
-        fill="url(#lm-num)"
+        fontFamily="var(--font-bricolage), ui-sans-serif, system-ui, sans-serif"
+        fontWeight="700"
+        fontSize="30"
+        letterSpacing="-1.5"
+        fill="url(#lm-mono)"
       >
-        5
+        S5
       </text>
-      <circle cx="48" cy="47" r="4" fill="#fde047" opacity="0.7" />
     </svg>
   );
 }
@@ -48,7 +52,7 @@ export function LogoWordmark({ size = 32 }: { size?: number }) {
     <div className="flex items-center gap-2.5">
       <LogoMark size={size} />
       <div>
-        <div className="text-sm font-bold leading-tight tracking-tight">Sacred 5</div>
+        <div className="font-display text-sm font-semibold leading-tight tracking-tight">Sacred 5</div>
         <div className="text-xs text-muted-foreground leading-tight">Daily practices</div>
       </div>
     </div>

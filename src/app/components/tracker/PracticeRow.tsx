@@ -4,7 +4,6 @@ import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PracticeDto } from "@/lib/http/api";
 import { practiceEmoji } from "@/config/practicePresentation";
-import { formatPointsShort } from "@/lib/formatPoints";
 import { practiceVisual } from "@/lib/practices/practiceVisual";
 import { PracticeProgressBar } from "./PracticeProgressBar";
 import { TRACKER_STRINGS } from "@/config/strings/tracker";
@@ -23,86 +22,68 @@ export function PracticeRow({
   onUndo: (id: string) => void | Promise<void>;
 }) {
   const style = practiceVisual({ id: practice.id, name: practice.name });
-  const Icon = style.icon;
   const emoji = practiceEmoji(practice);
   const progress = Math.min(1, count / practice.maxPerDay);
   const isComplete = count >= practice.maxPerDay;
   const disabledDone = busy || isComplete;
   const disabledUndo = busy || count <= 0;
 
-  const status = isComplete
-    ? TRACKER_STRINGS.completedForToday
-    : count > 0
-      ? TRACKER_STRINGS.moreAvailable(practice.maxPerDay - count)
-      : TRACKER_STRINGS.notStarted;
-
   return (
     <li
       className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition-all duration-200",
+        "group flex flex-col rounded-2xl border bg-card p-4 shadow-sm transition-all duration-200",
         isComplete ? "border-primary/20 bg-primary/5" : "hover:border-border/80 hover:shadow-md"
       )}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-center justify-between gap-2">
         <div
           className={cn(
-            "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl shadow-sm transition-transform group-hover:scale-105",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xl shadow-sm",
             style.gradient
           )}
           aria-hidden
         >
-          <span className="relative z-10 drop-shadow">{emoji}</span>
-          <div className="absolute bottom-0.5 right-0.5 flex h-6 w-6 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-            <Icon className="h-3.5 w-3.5 text-white" />
-          </div>
+          <span className="drop-shadow-sm">{emoji}</span>
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h3 className="font-semibold leading-snug text-foreground">{practice.name}</h3>
-              <p className="mt-0.5 text-xs text-muted-foreground">{formatPointsShort(practice.points)} each</p>
-            </div>
-
-            <div
-              className={cn(
-                "flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-sm font-bold",
-                isComplete ? "bg-primary text-primary-foreground" : `${style.lightBg} ${style.lightText}`
-              )}
-            >
-              <span>{count}</span>
-              <span className="font-normal opacity-60">/ {practice.maxPerDay}</span>
-            </div>
-          </div>
-
-          <PracticeProgressBar className="mt-3" fraction={progress} barClassName={style.bar} />
-
-          <p className="mt-1.5 text-xs text-muted-foreground">{status}</p>
+        <div
+          className={cn(
+            "shrink-0 rounded-full px-2.5 py-1 text-sm font-bold tabular-nums",
+            isComplete ? "bg-primary text-primary-foreground" : `${style.lightBg} ${style.lightText}`
+          )}
+        >
+          {count}
+          <span className="font-normal opacity-60">/{practice.maxPerDay}</span>
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-2">
+      <h3 className="mt-3 truncate text-sm font-semibold leading-snug text-foreground">{practice.name}</h3>
+
+      <PracticeProgressBar className="mt-2" fraction={progress} barClassName={style.bar} />
+
+      <div className="mt-3 flex items-center gap-2">
         <button
           type="button"
+          aria-label={`${TRACKER_STRINGS.undo} ${practice.name}`}
           className={cn(
-            "flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-medium transition-all",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-all",
             disabledUndo
-              ? "cursor-not-allowed border-border opacity-40 text-muted-foreground"
+              ? "cursor-not-allowed border-border text-muted-foreground opacity-40"
               : "border-border text-muted-foreground hover:border-foreground/30 hover:bg-muted hover:text-foreground active:scale-95"
           )}
           disabled={disabledUndo}
           onClick={() => void onUndo(practice.id)}
         >
-          <Minus className="h-3.5 w-3.5" />
-          {TRACKER_STRINGS.undo}
+          <Minus className="h-4 w-4" />
         </button>
 
         <button
           type="button"
+          aria-label={`${TRACKER_STRINGS.markDone} ${practice.name}`}
           className={cn(
-            "flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all",
+            "flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-all",
             disabledDone
-              ? "cursor-not-allowed bg-muted opacity-40 text-muted-foreground"
+              ? "cursor-not-allowed bg-muted text-muted-foreground opacity-40"
               : `bg-gradient-to-r ${style.gradient} text-white shadow-sm hover:opacity-90 active:scale-95`
           )}
           disabled={disabledDone}
@@ -112,7 +93,7 @@ export function PracticeRow({
             <span className="animate-pulse">{TRACKER_STRINGS.busyEllipsis}</span>
           ) : (
             <>
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-4 w-4" />
               {isComplete ? TRACKER_STRINGS.done : TRACKER_STRINGS.markDone}
             </>
           )}

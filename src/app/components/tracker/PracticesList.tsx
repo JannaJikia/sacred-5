@@ -11,24 +11,16 @@ import { DAILY_COMPLETION_GOAL } from "@/config/rewards";
 
 function PracticeRowSkeleton() {
   return (
-    <li className="rounded-2xl border bg-card p-5 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-muted" />
-        <div className="flex-1 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-1.5">
-              <div className="h-4 w-28 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="h-7 w-14 animate-pulse rounded-full bg-muted" />
-          </div>
-          <div className="mt-3 h-1.5 w-full animate-pulse rounded-full bg-muted" />
-          <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-        </div>
+    <li className="flex flex-col rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-muted" />
+        <div className="h-6 w-12 animate-pulse rounded-full bg-muted" />
       </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <div className="h-9 w-20 animate-pulse rounded-xl bg-muted" />
-        <div className="h-9 w-28 animate-pulse rounded-xl bg-muted" />
+      <div className="mt-3 h-4 w-24 animate-pulse rounded bg-muted" />
+      <div className="mt-2 h-1.5 w-full animate-pulse rounded-full bg-muted" />
+      <div className="mt-3 flex items-center gap-2">
+        <div className="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-muted" />
+        <div className="h-9 flex-1 animate-pulse rounded-xl bg-muted" />
       </div>
     </li>
   );
@@ -76,7 +68,7 @@ export function PracticesList() {
           <div className="h-4 w-24 animate-pulse rounded bg-muted" />
           <div className="h-4 w-16 animate-pulse rounded bg-muted" />
         </div>
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((i) => (
             <PracticeRowSkeleton key={i} />
           ))}
@@ -108,7 +100,7 @@ export function PracticesList() {
         </div>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="grid grid-cols-2 gap-3">
         {practices.map((p) => (
           <PracticeRow
             key={p.id}
