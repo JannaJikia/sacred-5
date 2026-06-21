@@ -8,5 +8,7 @@ export const PAGE_STRINGS = {
   practicesSubtitle: "Manage the practices you track",
   leaderboardTitle: "Leaderboard",
   leaderboardSubtitle: "How you stack up",
+  rewardsTitle: "Rewards",
+  rewardsSubtitle: "Coins you've earned, and what they unlock",
   appFallbackTitle: "App",
 } as const;

@@ -75,10 +75,13 @@ export function AppShell({
 
               <div className="my-3 border-t border-border" />
 
-              <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2 text-sm">
+              <Link
+                href="/rewards"
+                className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2 text-sm transition hover:bg-muted"
+              >
                 <span className="text-muted-foreground">{NAV_STRINGS.coins}</span>
                 <span className="font-bold tabular-nums text-primary">{coins}</span>
-              </div>
+              </Link>
 
               <LogoutButton
                 redirectTo="/welcome"
@@ -96,13 +99,14 @@ export function AppShell({
                 {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
               </div>
               <div className="flex items-center gap-2 md:hidden">
-                <div
-                  className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-primary"
+                <Link
+                  href="/rewards"
+                  className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-primary transition hover:bg-muted/70"
                   aria-label={`${NAV_STRINGS.coins}: ${coins}`}
                 >
                   <Coins className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                   <span className="tabular-nums">{coins}</span>
-                </div>
+                </Link>
                 <ThemeToggle />
                 <div className="relative">
                   <button
