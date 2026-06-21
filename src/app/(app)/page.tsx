@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PracticesList } from "@components/tracker/PracticesList";
+import { StreakBadge } from "@components/tracker/StreakBadge";
 import { PAGE_STRINGS } from "@/config/strings/pages";
 
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
+      <StreakBadge />
       <PracticesList />
       <Link
         href="/stats"

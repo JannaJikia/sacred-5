@@ -72,6 +72,10 @@ export function postUndo(practiceId: string) {
   });
 }
 
+export function getStreak() {
+  return fetchJson<{ streak: number }>("/api/streak", { cache: "no-store" });
+}
+
 export type OnboardingResponse = {
   practiceIds: string[];
 };

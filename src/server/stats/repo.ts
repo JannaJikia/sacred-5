@@ -37,6 +37,15 @@ export async function fetchActiveDays(db: Db, userId: string, whereRange: object
   return rows.filter((r) => (r._sum.count ?? 0) > 0).length;
 }
 
+/** Distinct day keys (in [gte, lte]) on which the user completed at least one practice. */
+export async function fetchActiveDayKeys(db: Db, userId: string, gteDayKey: string, lteDayKey: string) {
+  const rows = await db.dailyPracticeCompletion.groupBy({
+    by: ["dayKey"],
+    where: { userId, count: { gt: 0 }, dayKey: { gte: gteDayKey, lte: lteDayKey } },
+  });
+  return rows.map((r) => r.dayKey);
+}
+
 export async function fetchDailyPracticeSums(db: Db, userId: string, whereRange: object) {
   const rows = await db.dailyPracticeCompletion.groupBy({
     by: ["dayKey", "practiceId"],
