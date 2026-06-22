@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Coins, LogOut } from "lucide-react";
+import { Coins, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/app/components/auth/LogoutButton";
 import { LogoWordmark } from "@/app/components/Logo";
@@ -21,6 +21,12 @@ export function AppShell({
   const pathname = usePathname();
   const { title, subtitle } = shellPageMeta(pathname);
   const [coins, setCoins] = useState(initialCoins);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  // Close the account menu on route change.
+  useEffect(() => {
+    setAccountOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     setCoins(initialCoins);
@@ -42,7 +48,7 @@ export function AppShell({
           <aside className="hidden md:block">
             <div className="sticky top-6 space-y-2">
               <div className="mb-6 flex items-center justify-between gap-2 px-1">
-                <LogoWordmark size={36} />
+                <LogoWordmark size={30} />
                 <ThemeToggle />
               </div>
 
@@ -69,10 +75,13 @@ export function AppShell({
 
               <div className="my-3 border-t border-border" />
 
-              <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2 text-sm">
+              <Link
+                href="/rewards"
+                className="flex items-center justify-between rounded-xl bg-muted/50 px-3 py-2 text-sm transition hover:bg-muted"
+              >
                 <span className="text-muted-foreground">{NAV_STRINGS.coins}</span>
                 <span className="font-bold tabular-nums text-primary">{coins}</span>
-              </div>
+              </Link>
 
               <LogoutButton
                 redirectTo="/welcome"
@@ -90,14 +99,43 @@ export function AppShell({
                 {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
               </div>
               <div className="flex items-center gap-2 md:hidden">
-                <div
-                  className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-primary"
+                <Link
+                  href="/rewards"
+                  className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-primary transition hover:bg-muted/70"
                   aria-label={`${NAV_STRINGS.coins}: ${coins}`}
                 >
                   <Coins className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                   <span className="tabular-nums">{coins}</span>
-                </div>
+                </Link>
                 <ThemeToggle />
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setAccountOpen((v) => !v)}
+                    aria-haspopup="menu"
+                    aria-expanded={accountOpen}
+                    aria-label={NAV_STRINGS.account}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:text-foreground"
+                  >
+                    <User className="h-4 w-4" />
+                  </button>
+                  {accountOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" aria-hidden onClick={() => setAccountOpen(false)} />
+                      <div
+                        role="menu"
+                        className="absolute right-0 top-11 z-50 w-44 rounded-xl border border-border bg-card p-1 shadow-lg"
+                      >
+                        <LogoutButton
+                          redirectTo="/welcome"
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-50"
+                          icon={<LogOut className="h-4 w-4 shrink-0" />}
+                          label={NAV_STRINGS.logout}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             {children}
@@ -122,14 +160,6 @@ export function AppShell({
             </Link>
           );
         })}
-        <div className="flex flex-1 flex-col items-center justify-center py-2">
-          <LogoutButton
-            redirectTo="/welcome"
-            className="flex flex-col items-center gap-1 text-xs font-medium text-muted-foreground disabled:opacity-50"
-            icon={<LogOut className="h-5 w-5" />}
-            label={NAV_STRINGS.logout}
-          />
-        </div>
       </nav>
     </div>
   );

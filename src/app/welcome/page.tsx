@@ -8,13 +8,19 @@ import { WelcomeNav } from "@/app/components/welcome/WelcomeNav";
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-screen" style={{ background: "#060e07", color: "white" }}>
+    <div
+      data-surface="marketing"
+      className="min-h-screen font-sans"
+      style={{ background: "var(--mkt-bg)", color: "var(--mkt-text)" }}
+    >
       <WelcomeNav />
-      <HeroSection />
-      <PracticePreviewSection />
-      <FeaturesSection />
-      <PointsSection />
-      <CtaSection />
+      <main>
+        <HeroSection />
+        <PracticePreviewSection />
+        <FeaturesSection />
+        <PointsSection />
+        <CtaSection />
+      </main>
       <WelcomeFooter />
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { CELEBRATION_STRINGS } from "@/config/strings/tracker";
 import { cn } from "@/lib/utils";
-import { Coins, Sparkles, Star } from "lucide-react";
+import { Coins, Sparkles } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -42,51 +42,50 @@ export function DailyGoalCelebration({ open, coinsEarned, totalCoins, dailyGoal,
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="celebration-title"
+      onClick={onDismiss}
     >
       <div
         className={cn(
-          "relative max-w-sm overflow-hidden rounded-3xl border border-primary/30 bg-card p-8 text-center shadow-2xl",
-          "animate-in zoom-in-95 duration-300"
+          "relative w-full max-w-sm overflow-hidden rounded-3xl border border-primary/25 bg-card p-8 text-center shadow-2xl",
+          "motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:duration-300"
         )}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="pointer-events-none absolute inset-0 overflow-hidden text-primary/35">
-          <Sparkles className="absolute left-[10%] top-6 h-7 w-7 animate-bounce" aria-hidden />
-          <Star className="absolute right-[12%] top-10 h-6 w-6 animate-bounce [animation-delay:120ms]" aria-hidden />
-          <Coins
-            className="absolute left-[20%] bottom-16 h-6 w-6 animate-bounce text-amber-600/50 [animation-delay:200ms] dark:text-amber-400/45"
-            aria-hidden
-          />
-          <Sparkles className="absolute right-[18%] bottom-12 h-7 w-7 animate-bounce [animation-delay:280ms]" aria-hidden />
-        </div>
+        {/* Soft brand wash, contained and static */}
+        <div
+          className="pointer-events-none absolute -top-16 left-1/2 h-40 w-64 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
+          aria-hidden
+        />
 
-        <div className="relative mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
-          <Sparkles className="h-8 w-8 text-white" aria-hidden />
-        </div>
+        <div className="relative">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 ring-1 ring-primary/30 text-primary">
+            <Sparkles className="h-8 w-8" aria-hidden />
+          </div>
 
-        <h2 id="celebration-title" className="text-xl font-bold tracking-tight text-foreground">
-          {CELEBRATION_STRINGS.title}
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">{CELEBRATION_STRINGS.subtitle(dailyGoal)}</p>
+          <h2 id="celebration-title" className="mt-5 font-display text-2xl font-bold tracking-tight text-foreground">
+            {CELEBRATION_STRINGS.title}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">{CELEBRATION_STRINGS.subtitle(dailyGoal)}</p>
 
-        <div className="mt-6 flex flex-col items-center gap-1">
-          <div className="rounded-full bg-primary/15 px-4 py-2 text-lg font-bold text-primary tabular-nums">
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary/12 px-4 py-2 text-base font-bold text-primary tabular-nums">
+            <Coins className="h-4 w-4" aria-hidden />
             {CELEBRATION_STRINGS.coinsLine(coinsEarned)}
           </div>
-          <p className="text-xs text-muted-foreground">{CELEBRATION_STRINGS.balanceLine(totalCoins)}</p>
-        </div>
+          <p className="mt-2 text-xs text-muted-foreground">{CELEBRATION_STRINGS.balanceLine(totalCoins)}</p>
 
-        <button
-          ref={dismissRef}
-          type="button"
-          className="mt-8 w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-95 active:scale-[0.98]"
-          onClick={onDismiss}
-        >
-          {CELEBRATION_STRINGS.dismiss}
-        </button>
+          <button
+            ref={dismissRef}
+            type="button"
+            className="mt-7 w-full rounded-2xl bg-primary py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 active:scale-[0.98]"
+            onClick={onDismiss}
+          >
+            {CELEBRATION_STRINGS.dismiss}
+          </button>
+        </div>
       </div>
     </div>
   );

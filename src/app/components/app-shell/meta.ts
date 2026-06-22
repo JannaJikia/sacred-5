@@ -13,5 +13,8 @@ export function shellPageMeta(pathname: string): { title: string; subtitle: stri
   if (pathname.startsWith("/leaderboard")) {
     return { title: PAGE_STRINGS.leaderboardTitle, subtitle: PAGE_STRINGS.leaderboardSubtitle };
   }
+  if (pathname.startsWith("/rewards")) {
+    return { title: PAGE_STRINGS.rewardsTitle, subtitle: PAGE_STRINGS.rewardsSubtitle };
+  }
   return { title: PAGE_STRINGS.appFallbackTitle, subtitle: null };
 }

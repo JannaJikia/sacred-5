@@ -1,57 +1,44 @@
-import { Activity, BarChart3, BookOpen, Droplets, Flame, Shield, Sparkles } from "lucide-react";
+import { Brain, Flame, Footprints, NotebookPen, ShieldCheck, Snowflake, TrendingUp } from "lucide-react";
 import type React from "react";
 import { PRACTICES, type PracticeKey } from "@/config/practices";
-import { formatPointsShort } from "@/lib/formatPoints";
 
 export type WelcomeIcon = React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 
 const DESCRIPTIONS: Record<PracticeKey, string> = {
-  walk: "Ground yourself with mindful movement.",
-  cold_shower: "Shock your system into full alertness.",
-  journal: "Reflect, process, and clarify your mind.",
-  meditation: "Still the noise. Deepen your awareness.",
+  walk: "Clear your head with mindful movement, indoors or out.",
+  cold_shower: "Two cold minutes that wake up the whole day.",
+  journal: "Put the noise on paper and think a little straighter.",
+  meditation: "Sit, breathe, and widen the gap before you react.",
 };
 
-const WELCOME_META: Record<
-  PracticeKey,
-  { icon: WelcomeIcon; gradient: string; badge: string; maxLabel: string }
-> = {
-  walk: {
-    icon: Activity,
-    gradient: "from-emerald-400 to-teal-500",
-    badge: "bg-emerald-900/60 text-emerald-300",
-    maxLabel: "2× daily",
-  },
-  cold_shower: {
-    icon: Droplets,
-    gradient: "from-sky-400 to-cyan-500",
-    badge: "bg-sky-900/60 text-sky-300",
-    maxLabel: "1× daily",
-  },
-  journal: {
-    icon: BookOpen,
-    gradient: "from-yellow-400 to-amber-500",
-    badge: "bg-yellow-900/60 text-yellow-300",
-    maxLabel: "1× daily",
-  },
-  meditation: {
-    icon: Sparkles,
-    gradient: "from-lime-400 to-green-500",
-    badge: "bg-lime-900/60 text-lime-300",
-    maxLabel: "2× daily",
-  },
+const ICONS: Record<PracticeKey, WelcomeIcon> = {
+  walk: Footprints,
+  cold_shower: Snowflake,
+  journal: NotebookPen,
+  meditation: Brain,
 };
+
+function cadence(maxPerDay: number): string {
+  return maxPerDay === 1 ? "Once a day" : `Up to ${maxPerDay}× a day`;
+}
 
 export type PracticeCard = {
-  key: string;
+  key: PracticeKey;
   label: string;
   description: string;
-  pointsBadge: string;
-  max: string;
+  points: number;
+  cadence: string;
   icon: WelcomeIcon;
-  gradient: string;
-  badge: string;
 };
+
+export const practices: PracticeCard[] = PRACTICES.map((p) => ({
+  key: p.key,
+  label: p.label,
+  description: DESCRIPTIONS[p.key],
+  points: p.points,
+  cadence: cadence(p.maxPerDay),
+  icon: ICONS[p.key],
+}));
 
 export type Feature = {
   icon: WelcomeIcon;
@@ -59,38 +46,29 @@ export type Feature = {
   description: string;
 };
 
-export const practices: PracticeCard[] = PRACTICES.map((p) => {
-  const m = WELCOME_META[p.key];
-  return {
-    key: p.key,
-    label: p.label,
-    description: DESCRIPTIONS[p.key],
-    pointsBadge: formatPointsShort(p.points),
-    max: m.maxLabel,
-    icon: m.icon,
-    gradient: m.gradient,
-    badge: m.badge,
-  };
-});
-
 export const features: Feature[] = [
   {
     icon: Flame,
-    title: "Build streaks",
+    title: "Streaks you can trust",
     description:
-      "Log each practice in one tap. Daily counts and per-day limits keep things real — no inflating the numbers.",
+      "Log each practice in a single tap. Daily caps stop you inflating the count, so the streak you see is the streak you earned.",
   },
   {
-    icon: BarChart3,
-    title: "See your progress",
-    description:
-      "Weekly and monthly stats show exactly which practices you're nailing and where you can push further.",
+    icon: TrendingUp,
+    title: "Progress you can read",
+    description: "Weekly and monthly views show which practices are sticking and which one needs attention this week.",
   },
   {
-    icon: Shield,
+    icon: ShieldCheck,
     title: "Private by design",
-    description: "No ads. No social feed. Just you and your discipline. Secure session auth, your data only.",
+    description: "No ads, no feed, no follower count. Session auth keeps the data yours and no one else's.",
   },
 ];
 
-export const statWidths = ["85%", "60%", "100%", "70%"] as const;
+/** Sample data for the marketing weekly chart. Clearly illustrative, not real user data. */
+export const sampleWeek: { label: string; sessions: number; fill: number }[] = [
+  { label: "Walk", sessions: 11, fill: 0.85 },
+  { label: "Cold shower", sessions: 6, fill: 0.6 },
+  { label: "Journal", sessions: 7, fill: 1 },
+  { label: "Meditation", sessions: 9, fill: 0.72 },
+];

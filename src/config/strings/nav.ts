@@ -1,4 +1,4 @@
-import { LayoutDashboard, BarChart2, Trophy, ListChecks } from "lucide-react";
+import { LayoutDashboard, BarChart2, ListChecks } from "lucide-react";
 
 export const NAV_STRINGS = {
   dashboard: "Dashboard",
@@ -7,11 +7,13 @@ export const NAV_STRINGS = {
   leaderboard: "Leaderboard",
   logout: "Logout",
   coins: "Coins",
+  account: "Account",
 } as const;
 
+// Leaderboard is intentionally unlisted until it ships (future accountability
+// feature); the /leaderboard route still exists but is not a dead-end nav tab.
 export const APP_NAV_LINKS = [
   { href: "/", label: NAV_STRINGS.dashboard, icon: LayoutDashboard },
   { href: "/stats", label: NAV_STRINGS.stats, icon: BarChart2 },
   { href: "/practices", label: NAV_STRINGS.practices, icon: ListChecks },
-  { href: "/leaderboard", label: NAV_STRINGS.leaderboard, icon: Trophy },
 ] as const;

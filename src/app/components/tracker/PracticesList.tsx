@@ -2,33 +2,54 @@
 
 import { useState } from "react";
 import { PracticeRow } from "./PracticeRow";
+import { PracticeProgressBar } from "./PracticeProgressBar";
 import { useTrackerData } from "./useTrackerData";
 import { useTrackerActions } from "./useTrackerActions";
 import { DailyGoalCelebration } from "./DailyGoalCelebration";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, Check, RefreshCw, Target } from "lucide-react";
 import { TRACKER_STRINGS } from "@/config/strings/tracker";
-import { DAILY_COMPLETION_GOAL } from "@/config/rewards";
+import { DAILY_COMPLETION_GOAL, MILESTONE_REWARD_COINS } from "@/config/rewards";
+
+function DailyGoalProgress({ done, goal, reward }: { done: number; goal: number; reward: number }) {
+  const reached = done >= goal;
+  const shown = Math.min(done, goal);
+  return (
+    <div className="rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            {reached ? <Check className="h-4 w-4" /> : <Target className="h-4 w-4" />}
+          </span>
+          <div>
+            <div className="text-sm font-semibold text-foreground">
+              {reached ? TRACKER_STRINGS.goalReachedTitle : TRACKER_STRINGS.goalTitle}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {reached ? TRACKER_STRINGS.goalReachedHint(reward) : TRACKER_STRINGS.goalHint(reward, goal)}
+            </div>
+          </div>
+        </div>
+        <div className="text-sm font-bold tabular-nums text-primary">
+          {shown}/{goal}
+        </div>
+      </div>
+      <PracticeProgressBar className="mt-3" fraction={shown / goal} barClassName="bg-primary" />
+    </div>
+  );
+}
 
 function PracticeRowSkeleton() {
   return (
-    <li className="rounded-2xl border bg-card p-5 shadow-sm">
-      <div className="flex items-start gap-4">
-        <div className="h-12 w-12 shrink-0 animate-pulse rounded-xl bg-muted" />
-        <div className="flex-1 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div className="space-y-1.5">
-              <div className="h-4 w-28 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="h-7 w-14 animate-pulse rounded-full bg-muted" />
-          </div>
-          <div className="mt-3 h-1.5 w-full animate-pulse rounded-full bg-muted" />
-          <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-        </div>
+    <li className="flex flex-col rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-muted" />
+        <div className="h-6 w-12 animate-pulse rounded-full bg-muted" />
       </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <div className="h-9 w-20 animate-pulse rounded-xl bg-muted" />
-        <div className="h-9 w-28 animate-pulse rounded-xl bg-muted" />
+      <div className="mt-3 h-4 w-24 animate-pulse rounded bg-muted" />
+      <div className="mt-2 h-1.5 w-full animate-pulse rounded-full bg-muted" />
+      <div className="mt-3 flex items-center gap-2">
+        <div className="h-9 w-9 shrink-0 animate-pulse rounded-xl bg-muted" />
+        <div className="h-9 flex-1 animate-pulse rounded-xl bg-muted" />
       </div>
     </li>
   );
@@ -36,21 +57,21 @@ function PracticeRowSkeleton() {
 
 export function PracticesList() {
   const { practices, completions, byPracticeId, error, loading, reload } = useTrackerData();
-  const { busyKey, actionError, onDone, onUndo } = useTrackerActions(reload);
+  const { busyKey, onDone, onUndo } = useTrackerActions(reload);
   const [celebration, setCelebration] = useState<{
     coinsEarned: number;
     coinsBalance: number;
   } | null>(null);
+  // Per-practice optimistic deltas, cleared once the server reload reconciles (or rolls back on failure).
+  const [optimistic, setOptimistic] = useState<Record<string, number>>({});
 
-  const msg = actionError ?? error;
-
-  if (msg && !loading) {
+  if (error && !loading) {
     return (
       <section className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6">
         <div className="flex items-start gap-3">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-destructive">{msg}</p>
+            <p className="text-sm font-medium text-destructive">{error}</p>
             <div className="mt-3 flex items-center gap-3">
               <button
                 className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
@@ -76,7 +97,7 @@ export function PracticesList() {
           <div className="h-4 w-24 animate-pulse rounded bg-muted" />
           <div className="h-4 w-16 animate-pulse rounded bg-muted" />
         </div>
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((i) => (
             <PracticeRowSkeleton key={i} />
           ))}
@@ -85,38 +106,64 @@ export function PracticesList() {
     );
   }
 
-  const totalToday = Object.values(byPracticeId).reduce((sum, c) => sum + c.count, 0);
+  const countFor = (id: string, max: number) =>
+    Math.max(0, Math.min(max, (byPracticeId[id]?.count ?? 0) + (optimistic[id] ?? 0)));
+
+  const counts = Object.fromEntries(practices.map((p) => [p.id, countFor(p.id, p.maxPerDay)]));
+  const totalToday = practices.reduce((sum, p) => sum + counts[p.id], 0);
   const maxTotal = practices.reduce((sum, p) => sum + p.maxPerDay, 0);
 
+  function clearOptimistic(id: string) {
+    setOptimistic((d) => {
+      const next = { ...d };
+      delete next[id];
+      return next;
+    });
+  }
+
   async function handleDone(id: string) {
-    const res = await onDone(id);
-    if (res?.reward.milestoneHit) {
-      setCelebration({ coinsEarned: res.reward.coinsEarned, coinsBalance: res.reward.coinsBalance });
+    setOptimistic((d) => ({ ...d, [id]: (d[id] ?? 0) + 1 }));
+    try {
+      const res = await onDone(id);
+      if (res?.reward.milestoneHit) {
+        setCelebration({ coinsEarned: res.reward.coinsEarned, coinsBalance: res.reward.coinsBalance });
+      }
+    } finally {
+      clearOptimistic(id);
+    }
+  }
+
+  async function handleUndo(id: string) {
+    setOptimistic((d) => ({ ...d, [id]: (d[id] ?? 0) - 1 }));
+    try {
+      await onUndo(id);
+    } finally {
+      clearOptimistic(id);
     }
   }
 
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {TRACKER_STRINGS.todayPrefix} · {completions.dayKey}
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-          {TRACKER_STRINGS.completedSummary(totalToday, maxTotal)}
-        </div>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          {TRACKER_STRINGS.todayPrefix} · {completions.dayKey}
+        </p>
+        <span className="text-xs tabular-nums text-muted-foreground">
+          {TRACKER_STRINGS.sessionsSummary(totalToday, maxTotal)}
+        </span>
       </div>
 
-      <ul className="space-y-3">
+      <DailyGoalProgress done={totalToday} goal={DAILY_COMPLETION_GOAL} reward={MILESTONE_REWARD_COINS} />
+
+      <ul className="grid grid-cols-2 gap-3">
         {practices.map((p) => (
           <PracticeRow
             key={p.id}
             practice={p}
-            count={byPracticeId[p.id]?.count ?? 0}
+            count={counts[p.id]}
             busy={busyKey === p.id}
             onDone={handleDone}
-            onUndo={onUndo}
+            onUndo={handleUndo}
           />
         ))}
       </ul>

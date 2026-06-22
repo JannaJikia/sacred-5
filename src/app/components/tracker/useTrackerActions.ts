@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { postDone, postUndo, type DoneResponse } from "@/lib/http/api";
 import { UI_TEXT } from "@/config/uiText";
 
@@ -16,12 +17,25 @@ function emitCoinsUpdated(coins: number) {
 export function useTrackerActions(reload: () => Promise<void>) {
   const router = useRouter();
   const [busyKey, setBusyKey] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
+
+  /** Surface a transient action failure without tearing down the tracker grid. */
+  function reportError(e: unknown, fallback: string) {
+    const err = e as import("@/lib/http/client").HttpError;
+    if (err?.status === 401) {
+      toast.error(UI_TEXT.auth.pleaseLogin);
+      router.replace("/login");
+      return;
+    }
+    if (err?.code === "MAX_PER_DAY_REACHED") {
+      toast.error(UI_TEXT.errors.maxReached);
+      return;
+    }
+    toast.error(err?.message ?? fallback);
+  }
 
   async function onDone(practiceId: string): Promise<DoneResponse | null> {
     try {
       setBusyKey(practiceId);
-      setActionError(null);
       const data = await postDone(practiceId);
       try {
         await reload();
@@ -32,16 +46,7 @@ export function useTrackerActions(reload: () => Promise<void>) {
       emitPracticeUpdated();
       return data;
     } catch (e: unknown) {
-      const err = e as import("@/lib/http/client").HttpError;
-
-      if (err?.code === "MAX_PER_DAY_REACHED") {
-        setActionError(UI_TEXT.errors.maxReached);
-      } else if (err?.status === 401) {
-        setActionError(UI_TEXT.auth.pleaseLogin);
-        router.replace("/login");
-      } else {
-        setActionError(err?.message ?? UI_TEXT.errors.doneFailed);
-      }
+      reportError(e, UI_TEXT.errors.doneFailed);
       return null;
     } finally {
       setBusyKey(null);
@@ -51,22 +56,15 @@ export function useTrackerActions(reload: () => Promise<void>) {
   async function onUndo(practiceId: string) {
     try {
       setBusyKey(practiceId);
-      setActionError(null);
       await postUndo(practiceId);
       await reload();
       emitPracticeUpdated();
     } catch (e: unknown) {
-      const err = e as import("@/lib/http/client").HttpError;
-      if (err?.status === 401) {
-        setActionError(UI_TEXT.auth.pleaseLogin);
-        router.replace("/login");
-      } else {
-        setActionError(err?.message ?? UI_TEXT.errors.undoFailed);
-      }
+      reportError(e, UI_TEXT.errors.undoFailed);
     } finally {
       setBusyKey(null);
     }
   }
 
-  return { busyKey, actionError, onDone, onUndo };
+  return { busyKey, onDone, onUndo };
 }

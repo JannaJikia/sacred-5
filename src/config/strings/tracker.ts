@@ -8,8 +8,18 @@ export const TRACKER_STRINGS = {
   notStarted: "Not started today",
   undo: "Undo",
   markDone: "Mark done",
+  logShort: "Log",
   done: "Done",
   busyEllipsis: "…",
+  sessionsSummary: (done: number, max: number) => `${done}/${max} sessions`,
+  goalTitle: "Today's goal",
+  goalHint: (reward: number, goal: number) => `Earn +${reward} coins for ${goal} completions`,
+  goalReachedTitle: "Daily goal reached",
+  goalReachedHint: (reward: number) => `+${reward} coins earned today`,
+  streakTitle: (n: number) => `${n}-day streak`,
+  streakHint: "Show up tomorrow to keep it going",
+  streakEmptyTitle: "No streak yet",
+  streakEmptyHint: "Log a practice today to start one",
 } as const;
 
 export const CELEBRATION_STRINGS = {
