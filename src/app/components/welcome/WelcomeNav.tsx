@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogoMark } from "@/app/components/Logo";
+import { LogoWordmark } from "@/app/components/Logo";
 
 export function WelcomeNav() {
   return (
@@ -8,11 +8,8 @@ export function WelcomeNav() {
       style={{ borderColor: "var(--mkt-border)", background: "color-mix(in oklab, var(--mkt-bg) 78%, transparent)" }}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link href="/welcome" className="flex items-center gap-2.5">
-          <LogoMark size={30} />
-          <span className="font-serif text-xl font-semibold tracking-tight" style={{ color: "var(--mkt-text)" }}>
-            Sacred 5
-          </span>
+        <Link href="/welcome" className="flex items-center" style={{ color: "var(--mkt-text)" }}>
+          <LogoWordmark size={28} />
         </Link>
         <div className="flex items-center gap-2">
           <Link

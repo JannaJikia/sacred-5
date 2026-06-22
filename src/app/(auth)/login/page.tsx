@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AuthForm } from "@components/auth/AuthForm";
-import { LogoMark } from "@/app/components/Logo";
+import { LogoWordmark } from "@/app/components/Logo";
 
 export default function LoginPage() {
   return (
@@ -14,7 +14,7 @@ export default function LoginPage() {
 
       <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
-          <LogoMark size={52} />
+          <LogoWordmark size={40} />
           <h1 className="mt-4 font-display text-2xl font-bold tracking-tight">Welcome back</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">Sign in to continue your practice</p>
         </div>

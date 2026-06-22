@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { LogoMark } from "@/app/components/Logo";
+import { LogoWordmark } from "@/app/components/Logo";
 
 export function CtaSection() {
   return (
@@ -18,7 +18,7 @@ export function CtaSection() {
           aria-hidden
         />
         <div className="relative flex flex-col items-center">
-          <LogoMark size={44} />
+          <LogoWordmark size={40} />
           <h2 className="mt-6 font-display text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: "var(--mkt-text)" }}>
             Your next perfect day starts now
           </h2>

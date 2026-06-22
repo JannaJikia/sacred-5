@@ -46,17 +46,21 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   );
 }
 
-/** Full wordmark — sunburst mark + the serif "Sacred 5" wordmark, with an optional sub-line. */
-export function LogoWordmark({ size = 32, subtitle }: { size?: number; subtitle?: string }) {
+/**
+ * The logo lockup — sunburst mark snug against the serif "Sacred 5" wordmark,
+ * as a single unit. This is the logo used across the UI; the bare mark is only
+ * for the favicon.
+ */
+export function LogoWordmark({ size = 30 }: { size?: number }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <span className="inline-flex items-center gap-2">
       <LogoMark size={size} />
-      <div className="leading-tight">
-        <div className="font-serif font-semibold tracking-tight" style={{ fontSize: Math.round(size * 0.62) }}>
-          Sacred 5
-        </div>
-        {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
-      </div>
-    </div>
+      <span
+        className="font-serif font-semibold leading-none tracking-tight"
+        style={{ fontSize: Math.round(size * 0.74) }}
+      >
+        Sacred 5
+      </span>
+    </span>
   );
 }
