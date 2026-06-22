@@ -101,12 +101,11 @@ export function HeroSection() {
             className="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
             style={{ color: "var(--mkt-text)" }}
           >
-            Build a{" "}
-            <span style={{ color: "var(--mkt-accent)" }}>disciplined</span> life, one practice at a time.
+            A few good habits, done <span style={{ color: "var(--mkt-accent)" }}>every day</span>.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed" style={{ color: "var(--mkt-muted)" }}>
-            Walk, cold shower, journal, meditation. Log each in a tap, earn points, and watch the streak compound day
-            after day.
+            Walk, cold shower, journal, meditation. Tap to log each one and keep your streak going. No feeds, no
+            pressure, just the habits that matter.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
