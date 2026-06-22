@@ -3,21 +3,7 @@
 Daily practice tracker (walk, cold shower, journal, meditation, custom habits) — **Next.js (App Router)**, **Prisma 7**, **Postgres**. Session auth, timezone-aware days, atomic tracker rules, themes, coins, stats.
 
 - **Repository:** [github.com/JannaJikia/sacred-5](https://github.com/JannaJikia/sacred-5)
-- **Live demo (Vercel):** [https://sacred-5.vercel.app](https://sacred-5.vercel.app) — open `/welcome`, then sign in or register. *(If your Vercel project uses another hostname, update this link in the README.)*
-
-## Screenshots
-
-| Marketing (`/welcome`) | Sign in (`/login`) |
-| --- | --- |
-| ![Marketing landing](docs/screenshots/marketing.png) | ![Login](docs/screenshots/login.png) |
-
-| Register (`/register`) | Stats (`/stats`) |
-| --- | --- |
-| ![Register](docs/screenshots/register.png) | ![Stats](docs/screenshots/stats.png) |
-
-Regenerate images: [`docs/screenshots/README.md`](docs/screenshots/README.md).
-
----
+- **Live demo (Vercel):** [https://sacred-5.vercel.app](https://sacred-5.vercel.app) — open `/welcome`, then sign in or register. *(If 
 
 ## Branches & deploy
 
