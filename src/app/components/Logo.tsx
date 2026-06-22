@@ -5,27 +5,37 @@
  * (cream on the marketing surface, foreground in the themed app).
  */
 
-const RAYS = 12;
 const CENTER = 32;
+const INNER = 5;
 
-function sunburstRays() {
-  return Array.from({ length: RAYS }, (_, i) => {
-    const angle = (i / RAYS) * Math.PI * 2 - Math.PI / 2;
-    const long = i % 2 === 0;
-    const inner = 5.5;
-    const outer = long ? 28 : 19;
-    const half = 2.1;
-    const px = Math.cos(angle);
-    const py = Math.sin(angle);
-    const nx = -py;
-    const ny = px;
-    const bx = CENTER + px * inner;
-    const by = CENTER + py * inner;
-    const tip = `${(CENTER + px * outer).toFixed(2)},${(CENTER + py * outer).toFixed(2)}`;
-    const a = `${(bx + nx * half).toFixed(2)},${(by + ny * half).toFixed(2)}`;
-    const b = `${(bx - nx * half).toFixed(2)},${(by - ny * half).toFixed(2)}`;
-    return `${a} ${b} ${tip}`;
-  });
+// Irregular, hand-drawn-style spark: [angle°, ray length, mid-point bend].
+// Uneven angles + slight bends give the sketched starburst from the brand mark.
+const RAY_DEFS: [number, number, number][] = [
+  [-90, 25, 1.4],
+  [-62, 16, -1.2],
+  [-34, 22, 1.7],
+  [-12, 13, -0.9],
+  [16, 18, 1.1],
+  [44, 14, -1.4],
+  [70, 11, 0.9],
+  [92, 23, 1.2],
+  [124, 15, -1.1],
+  [150, 13, 1.3],
+  [172, 24, 1.6],
+  [-150, 17, -1.3],
+  [-118, 12, 1.0],
+];
+
+function rayPoints(angleDeg: number, length: number, bend: number): string {
+  const a = (angleDeg * Math.PI) / 180;
+  const dx = Math.cos(a);
+  const dy = Math.sin(a);
+  const nx = -dy;
+  const ny = dx;
+  const midR = INNER + (length - INNER) * 0.55;
+  const p = (r: number, off = 0) =>
+    `${(CENTER + dx * r + nx * off).toFixed(1)},${(CENTER + dy * r + ny * off).toFixed(1)}`;
+  return `${p(INNER)} ${p(midR, bend)} ${p(length)}`;
 }
 
 export function LogoMark({ size = 32 }: { size?: number }) {
@@ -38,10 +48,12 @@ export function LogoMark({ size = 32 }: { size?: number }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Sacred 5 logo"
     >
-      {sunburstRays().map((points, i) => (
-        <polygon key={i} points={points} fill="currentColor" />
-      ))}
-      <circle cx={CENTER} cy={CENTER} r={4} fill="currentColor" />
+      <g stroke="currentColor" strokeWidth={2.1} strokeLinecap="round" strokeLinejoin="round">
+        {RAY_DEFS.map(([angle, length, bend], i) => (
+          <polyline key={i} points={rayPoints(angle, length, bend)} />
+        ))}
+      </g>
+      <circle cx={CENTER} cy={CENTER} r={2.6} fill="currentColor" />
     </svg>
   );
 }
